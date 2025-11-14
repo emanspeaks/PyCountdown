@@ -7,6 +7,7 @@ from .timeconsts import (
     YMDHMSKEYS, TZUTC, TZCEN, TZEAS, TZMTN, TZPAC, LEAPS_TABLE, DAY2SEC,
     DAYSINMONTH, MS, JDJ2K, GSFC_MJD, USNO_MJD, UNIX_UTC_SEC,
 )
+from .timezone import USTimeZone
 
 
 def emb_kepler(tt: float):
@@ -84,17 +85,21 @@ def gpst_to_utc(gpst: float, leap: float = None):
 
 
 def ymdhms_dict_to_ymdhmsms_dict(ymdhms: dict):
-    ymdhmsms = {k: v + 0 for k, v, in ymdhms.items()}
+    ymdhmsms = {k: v if isinstance(v, tzinfo) else v + 0
+                for k, v in ymdhms.items()}
     sec, ms = divmod(ymdhms['second']*1e6, 1e6)
     ymdhmsms['second'] = int(sec)
     ymdhmsms['microsecond'] = int(ms)
     return ymdhmsms
 
 
+def sec_to_datetime(sec: float):
+    return ymdhms_dict_to_datetime({k: v for k, v in zip(YMDHMSKEYS,
+                                                         sec_to_ymdhms(sec))})
+
+
 def utc_sec_to_datetime(utc: float):
-    dt = ymdhms_dict_to_datetime({k: v for k, v in zip(YMDHMSKEYS,
-                                                       sec_to_ymdhms(utc))})
-    return dt.replace(tzinfo=TZUTC)
+    return sec_to_datetime(utc).replace(tzinfo=TZUTC)
 
 
 def ymdhms_dict_to_datetime(ymdhms: dict):
@@ -106,17 +111,24 @@ def datetime_to_ymdhms(dt: datetime):
 
 
 def utcoffset(utc: float, tz: tzinfo):
-    ymdhms = {k: v for k, v in zip(YMDHMSKEYS, sec_to_ymdhms(utc))}
-    utcdt = ymdhms_dict_to_datetime(ymdhms)
-    return utcdt.astimezone(tz).utcoffset().total_seconds()
+    return utc_sec_to_datetime(utc).astimezone(tz).utcoffset().total_seconds()
 
 
-def utc_to_central(utc: float):
-    return utc + utcoffset(utc, TZCEN)
+def utcoffset_local(local: float, tz: tzinfo, fold: int = 0,
+                    dst_known: bool = False):
+    dt = sec_to_datetime(local)
+    dt.replace(tzinfo=tz, fold=fold)
+    kwargs = ({'dst_known': True} if dst_known and isinstance(tz, USTimeZone)
+              else {})
+    return tz.utcoffset(dt, **kwargs).total_seconds()
 
 
 def utc_to_eastern(utc: float):
     return utc + utcoffset(utc, TZEAS)
+
+
+def utc_to_central(utc: float):
+    return utc + utcoffset(utc, TZCEN)
 
 
 def utc_to_mountain(utc: float):
@@ -125,6 +137,22 @@ def utc_to_mountain(utc: float):
 
 def utc_to_pacific(utc: float):
     return utc + utcoffset(utc, TZPAC)
+
+
+def eastern_to_utc(local: float, fold: int = 0, dst_known: bool = False):
+    return local - utcoffset_local(local, TZEAS, fold, dst_known)
+
+
+def central_to_utc(local: float, fold: int = 0, dst_known: bool = False):
+    return local - utcoffset_local(local, TZCEN, fold, dst_known)
+
+
+def mountain_to_utc(local: float, fold: int = 0, dst_known: bool = False):
+    return local - utcoffset_local(local, TZMTN, fold, dst_known)
+
+
+def pacific_to_utc(local: float, fold: int = 0, dst_known: bool = False):
+    return local - utcoffset_local(local, TZPAC, fold, dst_known)
 
 
 def ut1_to_utc(ut1: float, dut1: float):
@@ -290,12 +318,14 @@ def sec_to_ymdhms(formal: float, sec_digits: int = None):
     return (int(year), int(month), int(day), int(h), int(m), s)
 
 
-def dhms_to_sec(d: int, h: int, m: int, s: float):
-    return s + 60*m + 3600*h + DAY2SEC*d
+def dhms_to_sec(d: int, h: int, m: int, s: float, sign: int = 1):
+    return sign*(s + 60*m + 3600*h + DAY2SEC*d)
 
 
 def sec_to_dhms(x: float, sec_digits: int = None):
-    "returns d, h, m, s"
+    "returns d, h, m, s, sign"
+    sign = 1 - 2*(x < 0)
+    x *= sign
     d, tmp = divmod(x, DAY2SEC)
     h, tmp = divmod(tmp, 3600)
     scalar = pow(10, sec_digits or 0)
@@ -304,25 +334,28 @@ def sec_to_dhms(x: float, sec_digits: int = None):
 
     m, tmp = divmod(tmp, 60*scalar)
     s = tmp/scalar
-    return int(d), int(h), int(m), s
+    return int(d), int(h), int(m), s, sign
 
 
-def dhms_to_met_str(d: int, h: int, m: int, s: float):
+def dhms_to_met_str(d: int, h: int, m: int, s: float, sign: int = 1,
+                    sec_digits: int = 3):
+    signstr = '-' if sign < 0 else ''
     dstr = '{:02d}'.format(d)
     hstr = '{:02d}'.format(h)
     mstr = '{:02d}'.format(m)
-    sstr = '{:06.3f}'.format(s)
-    return dstr + '/' + hstr + ':' + mstr + ':' + sstr
+    sstr = f'{{:0{sec_digits + 2 + (sec_digits > 1)}.{sec_digits}f}}'.format(s)
+    return signstr + dstr + '/' + hstr + ':' + mstr + ':' + sstr
 
 
 def ymdhms_to_iso(y: int, mo: int, d: int, h: int, m: int,
-                  s: float, use_T: bool = True, zone: str = 'Z'):
+                  s: float, use_T: bool = True, zone: str = 'Z',
+                  sec_digits: int = 0):
     ystr = '{:04d}'.format(y)
     mostr = '{:02d}'.format(mo)
     dstr = '{:02d}'.format(d)
     hstr = '{:02d}'.format(h)
     mstr = '{:02d}'.format(m)
-    sstr = '{:02.0f}'.format(s)
+    sstr = f'{{:0{sec_digits + 2 + (sec_digits > 1)}.{sec_digits}f}}'.format(s)
     tstr = 'T' if use_T else ' '
     return (
         ystr + '-' + mostr + '-' + dstr + tstr
@@ -355,12 +388,13 @@ def unix_to_central(unix: float):
     return utc_to_central(utc)
 
 
-def sec_to_dhms_str(sec: float, sec_digits: int = None):
-    return dhms_to_met_str(*sec_to_dhms(sec, sec_digits))
+def sec_to_dhms_str(sec: float, sec_digits: int = 3):
+    return dhms_to_met_str(*sec_to_dhms(sec, sec_digits), sec_digits)
 
 
-def sec_to_ymdhms_str(sec: float, sec_digits: int = None):
-    return ymdhms_to_iso(*sec_to_ymdhms(sec, sec_digits), use_T=False, zone='')
+def sec_to_ymdhms_str(sec: float, sec_digits: int = 0):
+    return ymdhms_to_iso(*sec_to_ymdhms(sec, sec_digits), use_T=False, zone='',
+                         sec_digits=sec_digits)
 
 
 def now_unix_sec():
@@ -370,3 +404,8 @@ def now_unix_sec():
 def now_utc_sec():
     unix = now_unix_sec()
     return unix_to_utc(unix)
+
+
+def now_tai_sec():
+    utc = now_utc_sec()
+    return utc_to_tai(utc)

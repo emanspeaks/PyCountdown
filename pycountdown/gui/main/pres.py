@@ -1,4 +1,4 @@
-from pyrandyos.gui.qt import QTimer
+from pyrandyos.gui.qt import QTimer, Qt
 from pyrandyos.gui.callback import qt_callback
 from pyrandyos.gui.window import GuiWindow
 from pyrandyos.gui.dialogs.config import ConfigTreeDialog
@@ -6,15 +6,19 @@ from pyrandyos.gui.dialogs.config import ConfigTreeDialog
 from ...version import __version__
 from ...logging import log_func_call, DEBUGLOW2, log_info
 from ...app import PyCountdownApp
-from ...lib.timeutils import unix_to_central, now_unix_sec, sec_to_ymdhms_str
+from ...lib.clocks import Clock
+from ...lib.timeutils import now_tai_sec
 
 from .view import MainWindowView
+
+UserRole = Qt.UserRole
 
 
 class MainWindow(GuiWindow[MainWindowView]):
     @log_func_call
     def __init__(self):
         super().__init__(f'{PyCountdownApp.APP_NAME} v{__version__}')
+        self.clock_tick()
         self.create_timer()
 
     def create_gui_view(self, basetitle: str, *args,
@@ -37,4 +41,24 @@ class MainWindow(GuiWindow[MainWindowView]):
 
     @log_func_call(DEBUGLOW2)
     def clock_tick(self):
-        log_info(f"tock: {sec_to_ymdhms_str(unix_to_central(now_unix_sec()))}")
+        # timestr = sec_to_ymdhms_str(unix_to_central(now_unix_sec()))
+        # log_info(f"tock: {timestr}")
+        now = now_tai_sec()
+
+        table = self.gui_view.clock_table
+        for i in range(table.rowCount()):
+            item = table.item(i, 1)
+            clk: Clock = item.data(UserRole)
+            item.setText(clk.display(now))
+
+    @log_func_call
+    def row_header_clicked(self, row: int) -> None:
+        """
+        Called when a row header is clicked. Copies the reconstructed
+        original log line to the clipboard.
+        """
+        table = self.gui_view.clock_table
+        items = [table.item(row, col) for col in range(table.columnCount())]
+        items
+        log_info(f'Row {row} clicked')
+        # get_gui_app().qtobj.clipboard().setText(log_line)

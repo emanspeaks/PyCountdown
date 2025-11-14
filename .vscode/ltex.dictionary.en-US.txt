@@ -9,6 +9,7 @@ cfgpkgdir
 chgrp
 clippy
 clscache
+Consolas
 cpbase
 cpbasetxt
 db
@@ -37,6 +38,7 @@ fnames
 gpst
 gsfc
 hflip
+HPAD
 hubot
 IERS
 ified
@@ -131,6 +133,7 @@ tmpmodname
 tnew
 tock
 toolbtn
+TPAD
 tparse
 tqdm
 ttffile
@@ -149,8 +152,10 @@ utcdt
 utmain
 venv
 vflip
+vheader
 vint
 vline
+VPAD
 VSCode
 vscode-codicons
 waivable
