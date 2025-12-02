@@ -1,0 +1,36 @@
+[
+  {
+    "label": "UTC",
+    "clock": "UTC"
+  },
+  {
+    "label": "Central",
+    "clock": "US CT"
+  },
+  {
+    "label": "LP17 First Open",
+    "clock": "UTC",
+    "epoch": [2026, 2, 7, 2, 41, 0]
+  },
+  {
+    "label": "Inauguration",
+    "clock": "US ET",
+    "epoch": [2029, 1, 20, 12, 0, 0],
+    "hidden": true
+  },
+  {
+    "label": "Winter Break",
+    "clock": "US CT",
+    "epoch": [2025, 12, 19, 17, 0, 0]
+  },
+  // {
+  //   "label": "Anchor test",
+  //   "clock": "Winter break",
+  //   "epoch": 108,
+  // }
+  // {
+  //   "label": "Christmas",
+  //   "clock": "US CT",
+  //   "epoch": [2025, 12, 25, 0, 0, 0]
+  // },
+]

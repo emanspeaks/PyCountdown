@@ -13,5 +13,8 @@ BulletClockIconLayer = IconLayer(*BulletClockFontGlyph, 'white')
 
 ProgramIcon = IconSpec(IconStateSpec([SolidSquareIconLayer, BulletClockIconLayer]))  # noqa: E501
 ConfigIcon = IconSpec.generate_iconspec(Codicons, glyph=codicon_names.json)
+AddClockIcon = IconSpec.generate_iconspec(Codicons, glyph=codicon_names.add)
+RemoveClockIcon = IconSpec.generate_iconspec(Codicons, glyph=codicon_names.remove)  # noqa: E501
+RefreshIcon = IconSpec.generate_iconspec(Codicons, glyph=codicon_names.refresh)
 # CopyCodeIcon = IconSpec.generate_iconspec(FluentUI_Resize, glyph=fluentui_r_names.ic_fluent_clipboard_code_20_regular)  # noqa: E501
 # CopyNameIcon = IconSpec.generate_iconspec(FluentUI_Resize, glyph=fluentui_r_names.ic_fluent_clipboard_letter_20_regular)  # noqa: E501

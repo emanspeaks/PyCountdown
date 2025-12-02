@@ -4,10 +4,11 @@ from pyrandyos.gui.window import GuiWindow
 from pyrandyos.gui.dialogs.config import ConfigTreeDialog
 
 from ...version import __version__
-from ...logging import log_func_call, DEBUGLOW2, log_info
-from ...app import PyCountdownApp
-from ...lib.clocks import Clock
+from ...logging import log_func_call, DEBUGLOW2, log_info, log_debug
+from ...app import PyCountdownApp, CLOCKS_FILE_CHECK_SEC_KEY
+from ...lib.clocks import DEFAULT_CLOCKS, Clock
 from ...lib.timeutils import now_tai_sec
+from ...lib.displayclocks import DisplayClock
 
 from .view import MainWindowView
 
@@ -18,21 +19,30 @@ class MainWindow(GuiWindow[MainWindowView]):
     @log_func_call
     def __init__(self):
         super().__init__(f'{PyCountdownApp.APP_NAME} v{__version__}')
+        self.refresh_clocks_file()
         self.clock_tick()
-        self.create_timer()
+        self.create_timers()
 
     def create_gui_view(self, basetitle: str, *args,
                         **kwargs) -> MainWindowView:
         return MainWindowView(basetitle, self, *args, **kwargs)
 
     @log_func_call
-    def create_timer(self):
-        master_timer = QTimer(self.gui_view.qtobj)
+    def create_timers(self):
+        qtobj = self.gui_view.qtobj
+
+        master_timer = QTimer(qtobj)
         # master_timer.setSingleShot(True)
         master_timer.setInterval(1000)
         master_timer.timeout.connect(qt_callback(self.clock_tick))
         master_timer.start()
         self.master_timer = master_timer
+
+        clocks_file_timer = QTimer(qtobj)
+        clocks_file_timer.setInterval(PyCountdownApp[CLOCKS_FILE_CHECK_SEC_KEY]*1000)  # noqa: E501
+        clocks_file_timer.timeout.connect(qt_callback(self.refresh_clocks_file))  # noqa: E501
+        clocks_file_timer.start()
+        self.clocks_file_timer = clocks_file_timer
 
     @log_func_call
     def click_config(self):
@@ -51,8 +61,21 @@ class MainWindow(GuiWindow[MainWindowView]):
             clk: Clock = item.data(UserRole)
             item.setText(clk.display(now))
 
+    @log_func_call(DEBUGLOW2)
+    def refresh_clocks_file(self, clicked: bool = False):
+        logfunc = log_info if clicked else log_debug
+        logfunc('checking clocks file')
+        if PyCountdownApp.check_clocks_file(clicked):
+            log_info('clocks file reloaded')
+            self.update_table()
+
+    @log_func_call(DEBUGLOW2)
+    def update_table(self):
+        self.gui_view.populate_clock_table()
+        self.clock_tick()
+
     @log_func_call
-    def row_header_clicked(self, row: int) -> None:
+    def row_header_clicked(self, row: int):
         """
         Called when a row header is clicked. Copies the reconstructed
         original log line to the clipboard.
@@ -62,3 +85,14 @@ class MainWindow(GuiWindow[MainWindowView]):
         items
         log_info(f'Row {row} clicked')
         # get_gui_app().qtobj.clipboard().setText(log_line)
+
+    @log_func_call
+    def add_clock(self):
+        DisplayClock.add_to_pool(DisplayClock(
+            'New clock', Clock(DEFAULT_CLOCKS['TAI'], now_tai_sec())))
+        self.update_table()
+
+    @log_func_call
+    def remove_clock(self, idx: int = -1):
+        DisplayClock.remove_from_pool(idx)
+        self.update_table()

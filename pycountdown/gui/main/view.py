@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING
+from functools import partial
 
 from pyrandyos.gui.qt import (
     QVBoxLayout, Qt, QToolBar, QTableWidget, QTableWidgetItem, QHeaderView,
@@ -15,9 +16,8 @@ from pyrandyos.gui.utils import (
 
 from ...app import PyCountdownApp
 from ...logging import log_func_call
-from ...lib.clocks import Clock, DEFAULT_CLOCKS
-from ...lib.timeutils import ymdhms_to_sec
-from ..gui_icons import ConfigIcon
+from ...lib.displayclocks import DisplayClock
+from ..gui_icons import ConfigIcon, AddClockIcon, RemoveClockIcon, RefreshIcon
 if TYPE_CHECKING:
     from .pres import MainWindow
 
@@ -64,6 +64,16 @@ class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
         qtobj.addToolBar(Qt.TopToolBarArea, toolbar)
         self.name_toolbar = toolbar
 
+        toolbar.addAction(create_action(qtobj, "Refresh from file",
+                                        RefreshIcon.icon(),
+                                        partial(pres.refresh_clocks_file, True)))  # noqa: E501
+        toolbar.addAction(create_action(qtobj, "Add clock",
+                                        AddClockIcon.icon(),
+                                        pres.add_clock, enabled=False))
+        toolbar.addAction(create_action(qtobj, "Remove clock",
+                                        RemoveClockIcon.icon(),
+                                        pres.remove_clock, enabled=False))
+
         toolbar.addWidget(create_toolbar_expanding_spacer())
 
         toolbar.addAction(create_action(qtobj, "Config", ConfigIcon.icon(),
@@ -81,7 +91,7 @@ class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
         layout.addWidget(clock_table)
         self.clock_table = clock_table
         self.setup_clock_table()
-        self.populate_clock_table(defaults=True)
+        self.populate_clock_table()
 
     @log_func_call
     def setup_clock_table(self):
@@ -109,39 +119,19 @@ class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
         vheader.sectionClicked.connect(qt_callback(pres.row_header_clicked))
 
     @log_func_call
-    def populate_clock_table(self, content: tuple[Clock] = None,
-                             defaults: bool = False):
+    def populate_clock_table(self):
         table = self.clock_table
-
-        if defaults:
-            content = (
-                ('UTC', DEFAULT_CLOCKS['UTC']),
-                ('Central', DEFAULT_CLOCKS['US CT']),
-                # ('Eastern', DEFAULT_CLOCKS['US ET']),
-                # ('TDB', DEFAULT_CLOCKS['TDB']),
-                # ('TDT', DEFAULT_CLOCKS['TDT']),
-                # ('Unix', DEFAULT_CLOCKS['Unix']),
-                ('GPST', DEFAULT_CLOCKS['GPST']),
-                ('LP17 First Open',
-                 Clock(DEFAULT_CLOCKS['UTC'],
-                       ymdhms_to_sec(2026, 2, 7, 2, 41, 0))),
-                ('Inauguration',
-                 Clock(DEFAULT_CLOCKS['US ET'],
-                       ymdhms_to_sec(2029, 1, 20, 12, 0, 0))),
-                ('Thanksgiving',
-                 Clock(DEFAULT_CLOCKS['US CT'],
-                       ymdhms_to_sec(2025, 11, 27, 0, 0, 0))),
-            )
-
-        rowcount = len(content)
+        clocks = [x for x in DisplayClock.pool if not x.hidden]
+        rowcount = len(clocks)
+        table.clearContents()
         table.setRowCount(rowcount)
-        for i, row in enumerate(content):
-            item = QTableWidgetItem(row[0])
+        for i, row in enumerate(clocks):
+            item = QTableWidgetItem(row.label)
             item.setFont(MONO_FONT)
             table.setItem(i, 0, item)
 
             item = QTableWidgetItem("Loading...")
-            item.setData(UserRole, row[1])
+            item.setData(UserRole, row.clock)
             item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             item.setFont(MONO_FONT)
             table.setItem(i, 1, item)
