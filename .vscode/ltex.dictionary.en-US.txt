@@ -111,6 +111,7 @@ qtwindow
 RBAR
 repr
 scroller
+SGMT
 shcore
 shiboken
 shibokensupport

@@ -7,19 +7,20 @@ from .timeutils import (
     unix_to_utc, utc_to_unix,
     eastern_to_utc, central_to_utc, mountain_to_utc, pacific_to_utc,
     utc_to_eastern, utc_to_central, utc_to_mountain, utc_to_pacific,
-    sec_to_dhms_str, sec_to_ymdhms_str,
+    sec_to_dhms_str, sec_to_ymdhms_str, format_number, sec_to_ydhms_str
 )
-from .timeconsts import GPST_EPOCH_TAI, UNIX_UTC_SEC
+from .timeconsts import GPST_EPOCH_TAI, UNIX_UTC_SEC, DAY2SEC
 
 
 class TimeFormat(Enum):
-    SECS = auto()
-    MINS = auto()
-    HOURS = auto()
-    DAYS = auto()
-    DHMS = auto()
-    YDHMS = auto()
-    YMDHMS = auto()
+    SECS = 's'
+    MINS = 'm'
+    HOURS = 'h'
+    DAYS = 'd'
+    DHMS = 't'  # T as in T-Minus
+    YDHMS = 'g'  # short for "GMT day"
+    YMDHMS = 'c'  # short for "calendar"
+    # ISO = 'i'
 
 
 class BaseClockRate(Enum):
@@ -68,6 +69,7 @@ class Clock:
                  epoch_dst_known: bool = False, epoch_fold: bool = False,
                  input_fmt: TimeFormat = TimeFormat.SECS,
                  rate: BaseClockRate = BaseClockRate.TAI,
+                 offset_sec: float = 0,
                  _dst_alt_clk: 'Clock' = None, _abs: bool = False):
         self._tai_cache = None
         self.anchor = anchor
@@ -76,8 +78,12 @@ class Clock:
         self.epoch_sec = epoch_sec
         self.input_fmt = input_fmt
         self.rate = rate
+        self.offset_sec = offset_sec
         self._dst_alt_clk = _dst_alt_clk
-        self._abs = anchor is None or _abs
+        self._abs = _abs
+
+    def is_abs(self):
+        return self._abs or self.anchor is None or bool(self.offset_sec)
 
     @property
     def epoch_sec(self):
@@ -86,7 +92,7 @@ class Clock:
     @epoch_sec.setter
     def epoch_sec(self, value: float):
         self._epoch_sec = value
-        self._tai_cache = self.epoch_to_tai(True)
+        self._tai_cache = None if value is None else self.epoch_to_tai(True)
 
     def epoch_to_tai(self, _force: bool = False):
         cache = self._tai_cache
@@ -95,10 +101,13 @@ class Clock:
 
         anchor = self.anchor
         epoch = self._epoch_sec
-        if anchor is None or epoch is None:
+        is_base = anchor is None
+        # refs_true_abs_base = epoch is None and anchor.anchor is None
+        copy_epoch = epoch is None
+        if is_base or copy_epoch:
             return
 
-        if anchor._abs:
+        if anchor.is_abs():  # is effectively a base (may be an offset clock)
             rate = anchor.rate
 
             # clock is at base, convert epoch to tai
@@ -134,38 +143,64 @@ class Clock:
         clock_tai = clock.epoch_to_tai()
         return my_tai - clock_tai
 
+    def cumulative_offset(self):
+        anchor = self.anchor
+        offset = self.offset_sec
+        if anchor:
+            offset += anchor.cumulative_offset()
+        return offset
+
+    def effective_tai(self, real_tai: float):
+        return real_tai - self.cumulative_offset()
+
     def tai_to_clock_time(self, tai: float):
-        epoch = self.epoch_to_tai()
-        if epoch is None:
-            rate = self.rate
-            epoch = tai
-            if rate is BaseClockRate.TAI:
+        offset = self.offset_sec
+        eff_tai = self.effective_tai(tai)
+        rate = self.rate
+        my_epoch = 0 if offset else (self.epoch_to_tai() or 0)
+        epoch = eff_tai - my_epoch
+
+        if rate is BaseClockRate.TAI:
+            return epoch
+
+        if rate in (BaseClockRate.T_EPH, BaseClockRate.TT):
+            epoch = tai_to_tt(epoch)
+            if rate is BaseClockRate.TT:
                 return epoch
+            return tt_to_et(epoch)
 
-            if rate in (BaseClockRate.T_EPH, BaseClockRate.TT):
-                epoch = tai_to_tt(epoch)
-                if rate is BaseClockRate.TT:
-                    return epoch
-                return tt_to_et(epoch)
+        epoch = tai_to_utc(epoch)
+        if rate is BaseClockRate.UTC:
+            return epoch
 
-            epoch = tai_to_utc(epoch)
-            if rate is BaseClockRate.UTC:
-                return epoch
+        if rate is BaseClockRate.UNIX:
+            return utc_to_unix(epoch)
 
-            if rate is BaseClockRate.UNIX:
-                return utc_to_unix(epoch)
+        if rate in US_DST:
+            return US_DST[rate][1](epoch)
 
-            if rate in US_DST:
-                return US_DST[rate][1](tai_to_utc(tai))
-
-        else:
-            return tai - epoch
-
-    def display(self, now_tai: float, fmt: TimeFormat = None):
-        my_tai = self.epoch_to_tai()
+    def display(self, now_tai: float, fmt: TimeFormat = None,
+                sec_digits: int = 0, zeropad: int = 0):
+        offset = self.offset_sec
+        my_tai = None if offset else self.epoch_to_tai()
         t = self.tai_to_clock_time(now_tai)
-        return (sec_to_ymdhms_str(t, 0) if my_tai is None
-                else sec_to_dhms_str(t, 0))
+        if fmt is None:
+            fmt = TimeFormat.YMDHMS if my_tai is None else TimeFormat.DHMS
+
+        if fmt is TimeFormat.SECS:
+            return format_number(t, sec_digits, zeropad)
+        elif fmt is TimeFormat.MINS:
+            return format_number(t/60, sec_digits, zeropad)
+        elif fmt is TimeFormat.HOURS:
+            return format_number(t/3600, sec_digits, zeropad)
+        elif fmt is TimeFormat.DAYS:
+            return format_number(t/DAY2SEC, sec_digits, zeropad)
+        elif fmt is TimeFormat.DHMS:
+            return sec_to_dhms_str(t, sec_digits)
+        elif fmt is TimeFormat.YDHMS:
+            return sec_to_ydhms_str(t, sec_digits)
+        elif fmt is TimeFormat.YMDHMS:
+            return sec_to_ymdhms_str(t, sec_digits)
 
 
 def create_default_clocks():

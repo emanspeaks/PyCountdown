@@ -23,14 +23,35 @@
     "clock": "US CT",
     "epoch": [2025, 12, 19, 17, 0, 0]
   },
-  // {
-  //   "label": "Anchor test",
-  //   "clock": "Winter break",
-  //   "epoch": 108,
-  // }
-  // {
-  //   "label": "Christmas",
-  //   "clock": "US CT",
-  //   "epoch": [2025, 12, 25, 0, 0, 0]
-  // },
+  {
+    "label": "SGMT base real time",
+    "clock": "US CT",
+    "epoch": [2025, 11, 12, 9, 40, 0],
+    "hidden": true
+  },
+  {
+    "label": "SGMT",
+    "clock": "UTC",
+    "epoch": [2024, 11, 24, 7, 1, 0.095],  // SGMT equivalent of real time
+    "offset": "SGMT base real time",  // real-time ref epoch
+    "rate": "UTC",
+    "display_format": "cal"
+  },
+  {
+    "label": "Sim Local",
+    "clock": "SGMT",
+    // "epoch": 0,
+    "rate": "US_CT",
+    "display_format": "cal"
+  },
+  {
+    "label": "MET",
+    "clock": "SGMT",
+    "epoch": [2024, 11, 24, 7, 1, 0.095]
+  },
+  {
+    "label": "Christmas",
+    "clock": "US CT",
+    "epoch": [2025, 12, 25, 0, 0, 0]
+  },
 ]

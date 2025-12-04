@@ -131,7 +131,7 @@ class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
             table.setItem(i, 0, item)
 
             item = QTableWidgetItem("Loading...")
-            item.setData(UserRole, row.clock)
+            item.setData(UserRole, row)
             item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             item.setFont(MONO_FONT)
             table.setItem(i, 1, item)
