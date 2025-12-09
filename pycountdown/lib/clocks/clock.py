@@ -30,7 +30,7 @@ class Clock:
             self._abs
             or (follow is not None and follow.is_abs())
             or (self.epoch is None and follow is None)
-            or (self.epoch and self.ref)
+            or (self.epoch is not None and self.ref is not None)
         )
 
     def is_offset(self):
@@ -38,15 +38,20 @@ class Clock:
 
     @property
     def offset_sec(self):
-        offset = self._offset_sec
-        if offset is None:
-            epoch = self.epoch
-            ref = self.ref
-            if epoch and ref:
+        tmp = self._offset_sec
+        no_offset = tmp is None
+        offset = tmp or 0
+        epoch = self.epoch
+        ref = self.ref
+        follow = self.follow
+        if epoch:
+            if no_offset and ref:
                 offset = epoch.to_tai().epoch_sec - ref.to_tai().epoch_sec
-
             else:
-                offset = 0
+                offset += epoch.clock.offset_sec
+
+        if follow:
+            offset += follow.offset_sec
 
         return offset
 
@@ -57,13 +62,9 @@ class Clock:
     def tai_to_clock_time(self, tai: float):
         offset = self.offset_sec
         epoch = self.epoch
-        follow = self.follow
         rate = self.rate
         eff_tai = offset + tai
-
-        if follow:
-            return follow.tai_to_clock_time(eff_tai)
-        if epoch:
+        if epoch and not self.is_abs():
             if rate is not _TAI_RATE:
                 raise NotImplementedError
             return Epoch(self, eff_tai - epoch.to_tai().epoch_sec)

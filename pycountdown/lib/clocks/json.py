@@ -50,13 +50,15 @@ def get_clock_by_id(clk_id: str, pool: list[DisplayClock],
                 idx = i
                 break
 
-    if idx is None:
-        return casesafe_dict_get(DEFAULT_CLOCKS, clk_id, CLOCK_NOT_FOUND,
-                                 True)
-    dclk = pool[idx]
-    if dclk:
-        return dclk.clock
-    return CLOCK_UNRESOLVED
+    if idx is not None:
+        dclk = pool[idx]
+        if dclk:
+            return dclk.clock
+
+    clock = casesafe_dict_get(DEFAULT_CLOCKS, clk_id, CLOCK_NOT_FOUND, True)
+    if clock is CLOCK_NOT_FOUND and idx is not None:
+        return CLOCK_UNRESOLVED
+    return clock
 
 
 def extract_clock_ids(data: list[dict]):
@@ -73,7 +75,10 @@ def extract_clock_ids(data: list[dict]):
     return label_list, id_list, id2idx
 
 
-def parse_rate(input_rate: str):
+def parse_rate(input_rate: str, follow: Clock = None):
+    if input_rate is None:
+        input_rate = follow.rate.name if follow else 'TAI'
+
     return BaseClockRate[input_rate.upper()]
 
 
@@ -144,13 +149,14 @@ def parse_clocks_jsonc(data: str | list[dict]):
             row = data[i]
 
             label = label_list[i]
-            rate = parse_rate(row.get('rate', 'TAI'))
 
             json_follow = row.get('follow')
             follow = get_clock_by_id(json_follow, dclk_to_add, id2idx,
                                      label_list)
             if handle_clock_problems(follow, json_follow):
                 continue
+
+            rate = parse_rate(row.get('rate'), follow)
 
             json_epoch: dict = row.get('epoch')
             epoch = parse_epoch(json_epoch, dclk_to_add, id2idx,
