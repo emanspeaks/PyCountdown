@@ -61,58 +61,67 @@
       ]
     }
   },
-  "type": "array",
-  "items": {
-    "type": "object",
-    "properties": {
-      "label": {
-        "type": "string",
-        "description": "Name to display for the clock"
-      },
-      "id": {
-        "type": "string",
-        "description": "ID to reference the clock"
-      },
-      "epoch": {
-        "description": "Epoch definition",
-        "$ref": "#epochtype"
-      },
-      "ref": {
-        "description": "Real-time reference epoch definition for offset clocks",
-        "$ref": "#epochtype"
-      },
-      "display": {
+  "type": "object",
+  "properties": {
+    "clocks": {
+      "type": "array",
+      "items": {
         "type": "object",
         "properties": {
-          "hidden": {
+          "label": {
+            "type": "string",
+            "description": "Name to display for the clock"
+          },
+          "id": {
+            "type": "string",
+            "description": "ID to reference the clock"
+          },
+          "epoch": {
+            "description": "Epoch definition",
+            "$ref": "#epochtype"
+          },
+          "ref": {
+            "description": "Real-time reference epoch definition for offset clocks",
+            "$ref": "#epochtype"
+          },
+          "display": {
+            "type": "object",
+            "properties": {
+              "hidden": {
+                "type": "boolean",
+                "description": "Show or hide this clock on the display"
+              },
+              "format": {
+                "$ref": "#timeformat"
+              },
+              "digits": {
+                "type": "number",
+                "description": "Number of digits to display in fractional amounts (usually seconds)"
+              },
+              "zeropad": {
+                "type": "number",
+                "description": "Minimum number of digits in the integral part of the value, and pad with this number of zeroes to ensure the minimum"
+              }
+            }
+          },
+          "follow": {
+            "type": "string",
+            "description": "Label or ID of clock this one follows or mirrors"
+          },
+          "rate": {
+            "$ref": "#timerate",
+            "description": "tick rate of this clock for seconds relative to epoch.  If `follow` is set and this is not, defaults to the rate of `follow`.  Otherwise, defaults to TAI."
+          },
+          "blank": {
             "type": "boolean",
-            "description": "Show or hide this clock on the display"
-          },
-          "format": {
-            "$ref": "#timeformat"
-          },
-          "digits": {
-            "type": "number",
-            "description": "Number of digits to display in fractional amounts (usually seconds)"
-          },
-          "zeropad": {
-            "type": "number",
-            "description": "Minimum number of digits in the integral part of the value, and pad with this number of zeroes to ensure the minimum"
+            "description": "inserts a blank line in the display here and ignores all other properties"
           }
-        }
-      },
-      "follow": {
-        "type": "string",
-        "description": "Label or ID of clock this one follows or mirrors"
-      },
-      "rate": {
-        "$ref": "#timerate",
-        "description": "tick rate of this clock for seconds relative to epoch.  If `follow` is set and this is not, defaults to the rate of `follow`.  Otherwise, defaults to TAI."
+        },
+        // "required": [
+        //   "label"
+        // ],
+        "additionalProperties": false
       }
-    },
-    "required": [
-      "label"
-    ],
-    "additionalProperties": false
+    }
   }
 }

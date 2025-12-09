@@ -66,11 +66,13 @@ def extract_clock_ids(data: list[dict]):
     id_list: list[str] = list()
     id2idx: dict[str, int] = dict()
     for i, row in enumerate(data):
-        label = row['label']
+        # blank = row.get('blank')
+        label = row.get('label')
         clk_id = row.get('id', label)
         label_list.append(label)
         id_list.append(clk_id)
-        id2idx[clk_id] = i
+        if clk_id:
+            id2idx[clk_id] = i
 
     return label_list, id_list, id2idx
 
@@ -128,9 +130,11 @@ def parse_display(data: dict):
     return TimeFormatter(hidden, fmt, digits, zeropad)
 
 
-def parse_clocks_jsonc(data: str | list[dict]):
+def parse_clocks_jsonc(data: str | dict):
     if isinstance(data, str):
-        data: list[dict] = parse_jsonc(data)
+        data: dict = parse_jsonc(data)
+
+    data: list[dict] = data['clocks']
 
     # first get names and IDs of all clocks
     label_list, id_list, id2idx = extract_clock_ids(data)
@@ -147,6 +151,9 @@ def parse_clocks_jsonc(data: str | list[dict]):
         for resolve_tmp in ids_to_resolve.copy():
             i, clk_id = resolve_tmp
             row = data[i]
+            if clk_id is None and row.get('blank'):
+                ids_to_resolve.remove(resolve_tmp)
+                continue
 
             label = label_list[i]
 

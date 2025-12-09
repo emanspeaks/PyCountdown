@@ -59,7 +59,8 @@ class MainWindow(GuiWindow[MainWindowView]):
         for i in range(table.rowCount()):
             item = table.item(i, 1)
             clk: DisplayClock = item.data(UserRole)
-            item.setText(clk.display(now))
+            txt = clk.display(now) if clk else ''
+            item.setText(txt)
 
     @log_func_call(DEBUGLOW2)
     def refresh_clocks_file(self, clicked: bool = False):

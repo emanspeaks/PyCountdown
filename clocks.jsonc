@@ -1,69 +1,72 @@
-[
-  {
-    "label": "UTC",
-    "follow": "UTC"
-  },
-  {
-    "label": "Central",
-    "follow": "US CT"
-  },
-  {
-    "label": "LP17 First Open",
-    "id": "lp17",
-    "epoch": {
-      "clock": "UTC",
-      "t": [2026, 2, 7, 2, 41, 0]
-    }
-  },
-  {
-    "label": "Inauguration",
-    "epoch": {
-      "clock": "US ET",
-      "t": [2029, 1, 20, 12, 0, 0]
+{
+  "$schema": "./pycountdown/assets/clocks.schema.jsonc",
+  "clocks": [
+    {
+      "label": "UTC",
+      "follow": "UTC"
     },
-    "display": {
-      "hidden": true
-    }
-  },
-  {
-    "label": "Winter Break",
-    "id": "break",
-    "epoch": {
-      "clock": "US CT",
-      "t": [2025, 12, 19, 17, 0, 0]
-    }
-  },
-  {
-    "label": "SGMT",
-    "epoch": {
-      "clock": "UTC",
-      "t": [2024, 11, 24, 7, 1, 0.095]  // SGMT equivalent of real time
+    {
+      "label": "Central",
+      "follow": "US CT"
     },
-    "ref": {  // real-time ref epoch
-      "clock": "US CT",
-      "t": [2025, 11, 12, 9, 40, 0]
+    {
+      "label": "LP17 First Open",
+      "id": "lp17",
+      "epoch": {
+        "clock": "UTC",
+        "t": [2026, 2, 7, 2, 41, 0]
+      }
     },
-    "rate": "UTC",
-    "display": {"format": "YMDHMS"}
-  },
-  {
-    "label": "Sim Local",
-    "follow": "SGMT",
-    "rate": "US_CT",
-    "display": {"format": "YMDHMS"}
-  },
-  {
-    "label": "MET",
-    "epoch": {
-      "clock": "SGMT",
-      "t": [2024, 11, 24, 7, 1, 0.095]
+    {
+      "label": "Inauguration",
+      "epoch": {
+        "clock": "US ET",
+        "t": [2029, 1, 20, 12, 0, 0]
+      },
+      "display": {
+        "hidden": true
+      }
+    },
+    {
+      "label": "Winter Break",
+      "id": "break",
+      "epoch": {
+        "clock": "US CT",
+        "t": [2025, 12, 19, 17, 0, 0]
+      }
+    },
+    {
+      "label": "SGMT",
+      "epoch": {
+        "clock": "UTC",
+        "t": [2024, 11, 24, 7, 1, 0.095]  // SGMT equivalent of real time
+      },
+      "ref": {  // real-time ref epoch
+        "clock": "US CT",
+        "t": [2025, 11, 12, 9, 40, 0]
+      },
+      "rate": "UTC",
+      "display": {"format": "YMDHMS"}
+    },
+    {
+      "label": "Sim Local",
+      "follow": "SGMT",
+      "rate": "US_CT",
+      "display": {"format": "YMDHMS"}
+    },
+    {
+      "label": "MET",
+      "epoch": {
+        "clock": "SGMT",
+        "t": [2024, 11, 24, 7, 1, 0.095]
+      }
+    },
+    {
+      "label": "Christmas",
+      "epoch": {
+        "clock": "US CT",
+        "t": [2025, 12, 25, 0, 0, 0]
+      }
     }
-  },
-  {
-    "label": "Christmas",
-    "epoch": {
-      "clock": "US CT",
-      "t": [2025, 12, 25, 0, 0, 0]
-    }
-  }
-]
+  ]
+}

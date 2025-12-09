@@ -121,12 +121,12 @@ class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
     @log_func_call
     def populate_clock_table(self):
         table = self.clock_table
-        clocks = [x for x in DisplayClock.pool if x and not x.hidden]
+        clocks = [x for x in DisplayClock.pool if x is None or not x.hidden]
         rowcount = len(clocks)
         table.clearContents()
         table.setRowCount(rowcount)
         for i, row in enumerate(clocks):
-            item = QTableWidgetItem(row.label)
+            item = QTableWidgetItem(row.label if row else '')
             item.setFont(MONO_FONT)
             table.setItem(i, 0, item)
 

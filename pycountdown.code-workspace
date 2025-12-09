@@ -24,15 +24,15 @@
 			"**/.conda": true,
 		},
 		"python.useEnvironmentsExtension": true,
-		"json.schemas": [
-			{
-				"fileMatch": [
-						"**/clocks.jsonc"
-				],
-				"url": "./pycountdown/assets/clocks.schema.jsonc"
-				// C:/scratch/git/pycountdown/pycountdown/assets/clocks.schema.jsonc
-			}
-		]
+		// "json.schemas": [
+		// 	{
+		// 		"fileMatch": [
+		// 				"**/clocks.jsonc"
+		// 		],
+		// 		"url": "./pycountdown/assets/clocks.schema.jsonc"
+		// 		// C:/scratch/git/pycountdown/pycountdown/assets/clocks.schema.jsonc
+		// 	}
+		// ]
   },
 	"launch": {
 		"version": "0.2.0",
