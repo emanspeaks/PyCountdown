@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "$id": "https://raw.githubusercontent.com/emanspeaks/PyCountdown/refs/heads/master/pycountdown/assets/clocks.schema.jsonc",
+  "title": "clocks",
+  "description": "definition of PyCountdown clocks",
+  "definitions": {
+    "timeformat": {
+      "$id": "#timeformat",
+      "enum": [
+        "S",  //secs
+        "M",  //mins
+        "H",  //hrs
+        "D",  //days
+        "DHMS",
+        "Y_DOY_HMS",
+        "YMDHMS"
+        // "ISO",
+      ]
+    },
+    "timerate": {
+      "$id": "#timerate",
+      "enum": [
+        "UNIX",
+        "UTC",
+        "TAI",
+        "TT",
+        "T_EPH",
+        "US_ET",
+        "US_CT",
+        "US_MT",
+        "US_PT"
+      ]
+    },
+    "epochtype": {
+      "$id": "#epochtype",
+      "type": "object",
+      "properties": {
+        "clock": {
+          "type": "string",
+          "description": "Label or ID of clock to which the epoch is referenced"
+        },
+        "t": {
+          "type": ["number", "array"],
+          "description": "If DHMS is intended as input format, the fifth element is the sign of the input.  Signs are ignored on other individual elements.  If this is an array, a six-element array is assumed to be YMDHMS, and a four-element is assumed to be DHMS.  Five-element arrays are ambiguous between DHMS with sign and Y_DOY_HMS, so format should be specified in those cases."
+        },
+        "format": {
+          "$ref": "#timeformat"
+        },
+        "fold_known": {
+          "type": "boolean",
+          "description": "indicates that the value of `fold` is actually known and not just the default `false` value"
+        },
+        "fold": {
+          "type": "boolean",
+          "description": "value is true if this is the second instance of this epoch in a clock that \"folds back\" on itself, such as DST during fall back to Standard or a positive leap second"
+        }
+      },
+      "required": [
+        "clock",
+        "t"
+      ]
+    }
+  },
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "label": {
+        "type": "string",
+        "description": "Name to display for the clock"
+      },
+      "id": {
+        "type": "string",
+        "description": "ID to reference the clock"
+      },
+      "epoch": {
+        "description": "Epoch definition",
+        "$ref": "#epochtype"
+      },
+      "ref": {
+        "description": "Real-time reference epoch definition for offset clocks",
+        "$ref": "#epochtype"
+      },
+      "display": {
+        "type": "object",
+        "properties": {
+          "hidden": {
+            "type": "boolean",
+            "description": "Show or hide this clock on the display"
+          },
+          "format": {
+            "$ref": "#timeformat"
+          },
+          "digits": {
+            "type": "number",
+            "description": "Number of digits to display in fractional amounts (usually seconds)"
+          },
+          "zeropad": {
+            "type": "number",
+            "description": "Minimum number of digits in the integral part of the value, and pad with this number of zeroes to ensure the minimum"
+          }
+        }
+      },
+      "follow": {
+        "type": "string",
+        "description": "Label or ID of clock this one follows or mirrors"
+      },
+      "rate": {
+        "$ref": "#timerate",
+        "description": "tick rate of this clock for seconds relative to epoch"
+      }
+    },
+    "required": [
+      "label"
+    ],
+    "additionalProperties": false
+  }
+}

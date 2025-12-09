@@ -36,6 +36,7 @@ filt
 FluentUI
 fluentui-system-icons
 fmtdict
+fmtr
 fnames
 gpst
 gsfc
@@ -68,6 +69,7 @@ mwview
 mymax
 ncols
 newppp
+NMTWRFS
 NOHINT
 noink
 noinks

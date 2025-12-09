@@ -4,6 +4,7 @@ from pyrandyos import PyRandyOSApp
 from pyrandyos.utils.json import load_jsonc
 
 from .logging import log_func_call
+from .lib.clocks.json import parse_clocks_jsonc
 
 HERE = Path(__file__).parent
 
@@ -46,7 +47,7 @@ class PyCountdownApp(PyRandyOSApp):
         if clocks_file and clocks_file.exists():
             mtime = clocks_file.stat().st_mtime
             if force or mtime != old_mtime:
-                from .lib.displayclocks import DisplayClock
+                from .lib.clocks.displayclocks import DisplayClock
                 cls.set(CLOCKS_MTIME_KEY, mtime)
-                DisplayClock.from_jsonc(load_jsonc(clocks_file))
+                DisplayClock.pool = parse_clocks_jsonc(load_jsonc(clocks_file))
                 return True

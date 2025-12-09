@@ -1,57 +1,69 @@
 [
   {
     "label": "UTC",
-    "clock": "UTC"
+    "follow": "UTC"
   },
   {
     "label": "Central",
-    "clock": "US CT"
+    "follow": "US CT"
   },
   {
     "label": "LP17 First Open",
-    "clock": "UTC",
-    "epoch": [2026, 2, 7, 2, 41, 0]
+    "id": "lp17",
+    "epoch": {
+      "clock": "UTC",
+      "t": [2026, 2, 7, 2, 41, 0]
+    }
   },
   {
     "label": "Inauguration",
-    "clock": "US ET",
-    "epoch": [2029, 1, 20, 12, 0, 0],
-    "hidden": true
+    "epoch": {
+      "clock": "US ET",
+      "t": [2029, 1, 20, 12, 0, 0]
+    },
+    "display": {
+      "hidden": true
+    }
   },
   {
     "label": "Winter Break",
-    "clock": "US CT",
-    "epoch": [2025, 12, 19, 17, 0, 0]
-  },
-  {
-    "label": "SGMT base real time",
-    "clock": "US CT",
-    "epoch": [2025, 11, 12, 9, 40, 0],
-    "hidden": true
+    "id": "break",
+    "epoch": {
+      "clock": "US CT",
+      "t": [2025, 12, 19, 17, 0, 0]
+    }
   },
   {
     "label": "SGMT",
-    "clock": "UTC",
-    "epoch": [2024, 11, 24, 7, 1, 0.095],  // SGMT equivalent of real time
-    "offset": "SGMT base real time",  // real-time ref epoch
+    "epoch": {
+      "clock": "UTC",
+      "t": [2024, 11, 24, 7, 1, 0.095]  // SGMT equivalent of real time
+    },
+    "ref": {  // real-time ref epoch
+      "clock": "US CT",
+      "t": [2025, 11, 12, 9, 40, 0]
+    },
     "rate": "UTC",
-    "display_format": "cal"
+    "display": {"format": "YMDHMS"}
   },
   {
     "label": "Sim Local",
-    "clock": "SGMT",
-    // "epoch": 0,
+    "follow": "SGMT",
     "rate": "US_CT",
-    "display_format": "cal"
+    "display": {"format": "YMDHMS"}
   },
   {
     "label": "MET",
-    "clock": "SGMT",
-    "epoch": [2024, 11, 24, 7, 1, 0.095]
+    "epoch": {
+      "clock": "SGMT",
+      "t": [2024, 11, 24, 7, 1, 0.095]
+    }
   },
   {
     "label": "Christmas",
-    "clock": "US CT",
-    "epoch": [2025, 12, 25, 0, 0, 0]
-  },
+    "epoch": {
+      "clock": "US CT",
+      "t": [2025, 12, 25, 0, 0, 0]
+    }
+  }
 ]

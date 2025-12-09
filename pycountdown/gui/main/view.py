@@ -16,7 +16,7 @@ from pyrandyos.gui.utils import (
 
 from ...app import PyCountdownApp
 from ...logging import log_func_call
-from ...lib.displayclocks import DisplayClock
+from ...lib.clocks.displayclocks import DisplayClock
 from ..gui_icons import ConfigIcon, AddClockIcon, RemoveClockIcon, RefreshIcon
 if TYPE_CHECKING:
     from .pres import MainWindow
@@ -121,7 +121,7 @@ class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
     @log_func_call
     def populate_clock_table(self):
         table = self.clock_table
-        clocks = [x for x in DisplayClock.pool if not x.hidden]
+        clocks = [x for x in DisplayClock.pool if x and not x.hidden]
         rowcount = len(clocks)
         table.clearContents()
         table.setRowCount(rowcount)

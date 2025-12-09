@@ -2,13 +2,13 @@ from pyrandyos.gui.qt import QTimer, Qt
 from pyrandyos.gui.callback import qt_callback
 from pyrandyos.gui.window import GuiWindow
 from pyrandyos.gui.dialogs.config import ConfigTreeDialog
+from pyrandyos.utils.time.now import now_tai_sec
 
 from ...version import __version__
 from ...logging import log_func_call, DEBUGLOW2, log_info, log_debug
 from ...app import PyCountdownApp, CLOCKS_FILE_CHECK_SEC_KEY
-from ...lib.clocks import DEFAULT_CLOCKS, Clock
-from ...lib.timeutils import now_tai_sec
-from ...lib.displayclocks import DisplayClock
+# from ...lib.clocks import DEFAULT_CLOCKS, Clock
+from ...lib.clocks.displayclocks import DisplayClock
 
 from .view import MainWindowView
 
@@ -88,11 +88,11 @@ class MainWindow(GuiWindow[MainWindowView]):
 
     @log_func_call
     def add_clock(self):
-        DisplayClock.add_to_pool(DisplayClock(
-            'New clock', Clock(DEFAULT_CLOCKS['TAI'], now_tai_sec())))
+        # DisplayClock.add_to_pool(DisplayClock(
+        #     'New clock', Clock(DEFAULT_CLOCKS['TAI'], now_tai_sec())))
         self.update_table()
 
     @log_func_call
     def remove_clock(self, idx: int = -1):
-        DisplayClock.remove_from_pool(idx)
+        # DisplayClock.remove_from_pool(idx)
         self.update_table()
