@@ -11,6 +11,6 @@
   // "log_func_call_enabled": true,
   // "local.theme": "light",
   "local.theme": "vibedark",
-  // "clocks_file": "./clocks.jsonc"
-  "clocks_file": "./sim.jsonc"
+  "clocks_file": "./clocks.jsonc"
+  // "clocks_file": "./sim.jsonc"
 }
