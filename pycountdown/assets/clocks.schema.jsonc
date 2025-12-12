@@ -40,8 +40,8 @@
           "description": "Label or ID of clock to which the epoch is referenced"
         },
         "t": {
-          "type": ["number", "array"],
-          "description": "If DHMS is intended as input format, the fifth element is the sign of the input.  Signs are ignored on other individual elements.  If this is an array, a six-element array is assumed to be YMDHMS, and a four-element is assumed to be DHMS.  Five-element arrays are ambiguous between DHMS with sign and Y_DOY_HMS, so format should be specified in those cases."
+          "type": ["number", "array", "string"],
+          "description": "If DHMS is intended as input format, the fifth element is the sign of the input.  Signs are ignored on other individual elements.  If this is an array, a six-element array is assumed to be YMDHMS, and a four-element is assumed to be DHMS.  Five-element arrays are ambiguous between DHMS with sign and Y_DOY_HMS, so format should be specified in those cases.  If it is a string and has a single forward or backward slash in it, it will be assumed to be DHMS.  Currently, other string formats are not supported."
         },
         "format": {
           "$ref": "#timeformat"
@@ -56,15 +56,39 @@
         }
       },
       "required": [
-        "clock",
+        // "clock",
         "t"
       ]
     }
   },
   "type": "object",
   "properties": {
+    "threshold_sets": {
+      "type": "object",
+      "description": "definition of clock styling threshold sets",
+      "patternProperties": {
+        "^.*$": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "epoch": {
+                "$ref": "#epochtype",
+                "description": "times >= this value will use this style until the next threshold chronologically in the list.  Note that the `clock` property may be omitted from this epoch, as any value here is ignored and assumed to be the \"current\" clock.  Omit this for the default/first threshold."
+              },
+              "color": {
+                "type": ["string", "array", "null"],
+                "description": "Color name string or RGB array defining text color for the clock label and time cells. A blank string, empty array, or `null` is the default color."
+              }
+            }
+            // "required": ["color"]
+          }
+        }
+      }
+    },
     "clocks": {
       "type": "array",
+      "description": "definition of PyCountdown clocks",
       "items": {
         "type": "object",
         "properties": {
@@ -101,6 +125,14 @@
               "zeropad": {
                 "type": "number",
                 "description": "Minimum number of digits in the integral part of the value, and pad with this number of zeroes to ensure the minimum"
+              },
+              "thresholds": {
+                "type": "string",
+                "description": "Name of threshold set to use for text styling"
+              },
+              "color": {
+                "type": ["string", "array"],
+                "description": "Color name string or RGB array defining default text color for the clock label and time cells."
               }
             }
           },

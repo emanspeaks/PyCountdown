@@ -5,18 +5,17 @@ from pyrandyos.utils.casesafe import (
 from pyrandyos.utils.time.gregorian import ymdhms_to_sec
 from pyrandyos.utils.time.dhms import dhms_to_sec
 from pyrandyos.utils.time.rate import BaseClockRate
-from pyrandyos.utils.time.fmt import (
-    TimeFormatter, TimeFormat, parse_time_format,
-)
+from pyrandyos.utils.time.fmt import TimeFormat, parse_time_format
 
 from ...logging import log_error
 
 from .clock import Clock, DEFAULT_CLOCKS
 from .displayclocks import DisplayClock
 from .epoch import Epoch
+from .fmt import ClockFormatter, ThresholdSet, ClockThreshold
 
 
-JsonEpochTimeType = float | int | list[float | int]
+JsonEpochTimeType = float | int | list[float | int] | str
 _SECS = TimeFormat.S
 CLOCK_NOT_FOUND = object()
 CLOCK_UNRESOLVED = object()
@@ -98,20 +97,45 @@ def parse_epoch_time(t: JsonEpochTimeType,
         else:
             raise NotImplementedError
 
+    elif isinstance(t, str):
+        tparts = t.strip().split('/')
+        len_tparts = len(tparts)
+        if len_tparts > 2:
+            raise NotImplementedError
+        if len_tparts == 1:
+            tparts = t.strip().split('\\')
+            len_tparts = len(tparts)
+            if len_tparts != 2:
+                raise NotImplementedError
+        tmp = tparts[0]
+        sign = -1 if tmp.startswith('-') else 1
+        day = int(tmp.split('-')[-1].strip())
+        hms = tparts[1].strip()
+        h = int(hms[:2])
+        m = int(hms[3:5])
+        s = float(hms[6:])
+        return dhms_to_sec(day, h, m, s, sign), TimeFormat.DHMS
+
     elif t is not None:
         return float(t), input_fmt
     return None, input_fmt
 
 
-def parse_epoch(data: dict, pool: list[DisplayClock], id2idx: dict[str, int],
-                label_list: list[str] = None):
+def parse_epoch(data: dict, pool: list[DisplayClock] = None,
+                id2idx: dict[str, int] = None, label_list: list[str] = None,
+                skip_clock: bool = False):
     if data is None:
         return
 
-    clockname: str = data['clock']  # data.get('clock') or data.get('anchor')
-    clock = get_clock_by_id(clockname, pool, id2idx, label_list)
-    if clock_has_problems(clock):
-        return clock
+    if skip_clock:
+        clock = None
+
+    else:
+        clockname: str = data.get('clock')  # or data.get('anchor')
+        clock = get_clock_by_id(clockname, pool, id2idx, label_list)
+        if clock_has_problems(clock):
+            return clock
+
     t, fmt = parse_epoch_time(data['t'],
                               parse_time_format(data.get('format', 's')))
     fold_known: bool = data.get('dst_known', False)
@@ -127,20 +151,35 @@ def parse_display(data: dict):
     fmt = parse_time_format(data.get('format'))
     digits: int = data.get('digits', 0)
     zeropad: int = data.get('zeropad', 0)
-    return TimeFormatter(hidden, fmt, digits, zeropad)
+    return ClockFormatter(hidden, fmt, digits, zeropad, data.get('color'),
+                          data.get('thresholds'))
+
+
+def parse_threshold(data: dict):
+    return ClockThreshold(parse_epoch(data.get('epoch'), skip_clock=True),
+                          data.get('color'))
+
+
+def parse_thresh_sets(data: dict[str, dict]):
+    if data:
+        return {k: ThresholdSet(k, [parse_threshold(x) for x in v])
+                for k, v in data.items()}
 
 
 def parse_clocks_jsonc(data: str | dict):
+    "returns dclk_to_add, thresh_sets"
     if isinstance(data, str):
         data: dict = parse_jsonc(data)
 
-    data: list[dict] = data['clocks']
+    thresh_sets = parse_thresh_sets(data.get('threshold_sets'))
+
+    clocks: list[dict] = data['clocks']
 
     # first get names and IDs of all clocks
-    label_list, id_list, id2idx = extract_clock_ids(data)
+    label_list, id_list, id2idx = extract_clock_ids(clocks)
     ids_to_resolve = list(enumerate(id_list))
     last_to_resolve = None
-    dclk_to_add: list[DisplayClock] = [None]*len(data)
+    dclk_to_add: list[DisplayClock] = [None]*len(clocks)
 
     while ids_to_resolve:
         if last_to_resolve == ids_to_resolve:
@@ -150,7 +189,7 @@ def parse_clocks_jsonc(data: str | dict):
         last_to_resolve = ids_to_resolve.copy()
         for resolve_tmp in ids_to_resolve.copy():
             i, clk_id = resolve_tmp
-            row = data[i]
+            row = clocks[i]
             if clk_id is None and row.get('blank'):
                 ids_to_resolve.remove(resolve_tmp)
                 continue
@@ -186,9 +225,9 @@ def parse_clocks_jsonc(data: str | dict):
 
             clock = Clock(epoch, ref, follow, rate, offset_sec, _abs)
 
-            display_fmt = parse_display(row.get('display')) or TimeFormatter()
+            display_fmt = parse_display(row.get('display')) or ClockFormatter()
             dclk_to_add[i] = DisplayClock(clk_id, label, clock, display_fmt)
 
             ids_to_resolve.remove(resolve_tmp)
 
-    return dclk_to_add
+    return dclk_to_add, thresh_sets

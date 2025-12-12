@@ -2,6 +2,7 @@ from pathlib import Path
 
 from pyrandyos import PyRandyOSApp
 from pyrandyos.utils.json import load_jsonc
+from pyrandyos.config.keys import LOCAL_CONFIG_FILE_KEY
 
 from .logging import log_func_call
 from .lib.clocks.json import parse_clocks_jsonc
@@ -22,6 +23,7 @@ class PyCountdownApp(PyRandyOSApp):
         'clocks_file': './clocks.jsonc',
         CLOCKS_MTIME_KEY: None,
         CLOCKS_FILE_CHECK_SEC_KEY: 5,
+        LOCAL_CONFIG_FILE_KEY: "~/.pycountdown_local_config.jsonc",
     }
 
     @classmethod
@@ -48,6 +50,10 @@ class PyCountdownApp(PyRandyOSApp):
             mtime = clocks_file.stat().st_mtime
             if force or mtime != old_mtime:
                 from .lib.clocks.displayclocks import DisplayClock
+                from .lib.clocks.fmt import ThresholdSet
                 cls.set(CLOCKS_MTIME_KEY, mtime)
-                DisplayClock.pool = parse_clocks_jsonc(load_jsonc(clocks_file))
+                clocks_jsonc = load_jsonc(clocks_file)
+                clk_pool, thresh_pool = parse_clocks_jsonc(clocks_jsonc)
+                DisplayClock.pool = clk_pool
+                ThresholdSet.pool = thresh_pool
                 return True

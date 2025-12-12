@@ -54,10 +54,10 @@ class Epoch:
         t = self.epoch_sec
         return sec_as_fmt(t, fmt, digits)
 
-    def to_tai(self):
+    def to_tai(self, anchor: 'Clock' = None):
         from .clock import TAI_CLOCK
         epoch_sec = self.epoch_sec
-        anchor = self.clock
+        anchor = anchor or self.clock
         if anchor.is_abs():  # is effectively a base (may be an offset clock)
             rate = anchor.rate
 

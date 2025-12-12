@@ -5,7 +5,7 @@ from pyrandyos.gui.dialogs.config import ConfigTreeDialog
 from pyrandyos.utils.time.now import now_tai_sec
 
 from ...version import __version__
-from ...logging import log_func_call, DEBUGLOW2, log_info, log_debug
+from ...logging import log_func_call, DEBUGLOW2, log_info, log_debuglow
 from ...app import PyCountdownApp, CLOCKS_FILE_CHECK_SEC_KEY
 # from ...lib.clocks import DEFAULT_CLOCKS, Clock
 from ...lib.clocks.displayclocks import DisplayClock
@@ -57,14 +57,21 @@ class MainWindow(GuiWindow[MainWindowView]):
 
         table = self.gui_view.clock_table
         for i in range(table.rowCount()):
+            labelitem = table.item(i, 0)
             item = table.item(i, 1)
             clk: DisplayClock = item.data(UserRole)
-            txt = clk.display(now) if clk else ''
+            txt = ''
+            if clk:
+                txt = clk.display(now)
+                color = clk.formatter.get_color(clk, now)
+                item.setTextColor(color)
+                labelitem.setTextColor(color)
+
             item.setText(txt)
 
     @log_func_call(DEBUGLOW2)
     def refresh_clocks_file(self, clicked: bool = False):
-        logfunc = log_info if clicked else log_debug
+        logfunc = log_info if clicked else log_debuglow
         logfunc('checking clocks file')
         if PyCountdownApp.check_clocks_file(clicked):
             log_info('clocks file reloaded')

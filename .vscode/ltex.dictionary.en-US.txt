@@ -60,6 +60,7 @@ logcfg
 lvwidget
 Marull
 mcol
+MECO
 midambig
 monkeypatch
 mostr

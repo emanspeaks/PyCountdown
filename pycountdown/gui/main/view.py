@@ -29,7 +29,10 @@ TABLE_TPAD = 2  # one sided
 TABLE_LPAD = 4  # one sided
 TABLE_VPAD = TABLE_TPAD*2  # two sided
 TABLE_HPAD = TABLE_LPAD*2  # two sided
-TABLE_CELL_STYLE = f"QTableWidget {{ background-color: black; }} QTableWidget::item {{ padding: {TABLE_TPAD}px {TABLE_LPAD}px; background-color: black; }}"  # noqa: E501
+TABLE_CELL_PADDING = f'padding: {TABLE_TPAD}px {TABLE_LPAD}px;'
+# TABLE_CELL_DEFAULT_STYLE = 'background-color: black; color: white;'
+TABLE_CELL_DEFAULT_STYLE = 'background-color: black;'
+TABLE_STYLE = f"QTableWidget {{ background-color: black; }} QTableWidget::item {{ {TABLE_CELL_PADDING} {TABLE_CELL_DEFAULT_STYLE}  }}"  # noqa: E501
 
 
 class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
@@ -107,7 +110,8 @@ class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
         header.setSectionResizeMode(QHeaderView.ResizeToContents)
         # header.setStretchLastSection(True)
 
-        table.setStyleSheet(TABLE_CELL_STYLE)
+        table.setStyleSheet(TABLE_STYLE)
+        # table.setStyleSheet("")
         table.setSortingEnabled(False)
         table.setSelectionBehavior(QTableWidget.SelectRows)
         table.setEditTriggers(QTableWidget.NoEditTriggers)  # Make readonly

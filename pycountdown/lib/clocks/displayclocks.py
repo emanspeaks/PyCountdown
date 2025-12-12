@@ -1,6 +1,7 @@
-from pyrandyos.utils.time.fmt import TimeFormatter, TimeFormat
+from pyrandyos.utils.time.fmt import TimeFormat
 
 from .clock import Clock, DEFAULT_CLOCKS
+from .fmt import ClockFormatter
 
 JsonEpochType = float | int | list[float | int]
 
@@ -9,7 +10,7 @@ class DisplayClock:
     pool: list['DisplayClock'] = list()
 
     def __init__(self, clk_id: str, label: str, clock: Clock,
-                 formatter: TimeFormatter):
+                 formatter: ClockFormatter):
 
         self.clk_id = clk_id
         self.label = label
@@ -19,7 +20,7 @@ class DisplayClock:
         formatter.time_format = fmt or (TimeFormat.YMDHMS if clock.is_abs()
                                         else TimeFormat.DHMS)
 
-    def display(self, now_tai: float, fmt: TimeFormatter = None):
+    def display(self, now_tai: float, fmt: ClockFormatter = None):
         return self.clock.display(now_tai, fmt or self.formatter)
 
     @property
