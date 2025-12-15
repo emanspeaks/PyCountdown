@@ -36,32 +36,6 @@
       }
     },
     {
-      "label": "SGMT",
-      "epoch": {
-        "clock": "UTC",
-        "t": [2024, 11, 24, 7, 1, 0.095]  // SGMT equivalent of real time
-      },
-      "ref": {  // real-time ref epoch
-        "clock": "US CT",
-        "t": [2025, 11, 12, 9, 40, 0]
-      },
-      "rate": "UTC",
-      "display": {"format": "YMDHMS"}
-    },
-    {
-      "label": "Sim Local",
-      "follow": "SGMT",
-      "rate": "US_CT",
-      "display": {"format": "YMDHMS"}
-    },
-    {
-      "label": "MET",
-      "epoch": {
-        "clock": "SGMT",
-        "t": [2024, 11, 24, 7, 1, 0.095]
-      }
-    },
-    {
       "label": "Christmas",
       "epoch": {
         "clock": "US CT",
