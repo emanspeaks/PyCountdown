@@ -6,6 +6,7 @@ from pyrandyos.utils.time.gregorian import ymdhms_to_sec
 from pyrandyos.utils.time.dhms import dhms_to_sec
 from pyrandyos.utils.time.rate import BaseClockRate
 from pyrandyos.utils.time.fmt import TimeFormat, parse_time_format
+from pyrandyos.utils.time.julian import DAY2SEC
 
 from ...logging import log_error
 
@@ -17,6 +18,12 @@ from .fmt import ClockFormatter, ThresholdSet, ClockThreshold
 
 JsonEpochTimeType = float | int | list[float | int] | str
 _SECS = TimeFormat.S
+TO_SEC = {
+    TimeFormat.S: 1,
+    TimeFormat.M: 60,
+    TimeFormat.H: 3600,
+    TimeFormat.D: DAY2SEC,
+}
 CLOCK_NOT_FOUND = object()
 CLOCK_UNRESOLVED = object()
 
@@ -117,7 +124,7 @@ def parse_epoch_time(t: JsonEpochTimeType,
         return dhms_to_sec(day, h, m, s, sign), TimeFormat.DHMS
 
     elif t is not None:
-        return float(t), input_fmt
+        return float(t)*TO_SEC[input_fmt], input_fmt
     return None, input_fmt
 
 

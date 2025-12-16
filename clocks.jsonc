@@ -1,5 +1,5 @@
 {
-  "$schema": "./pycountdown/assets/clocks.schema.jsonc",
+  "$schema": "https://raw.githubusercontent.com/emanspeaks/PyCountdown/refs/heads/master/pycountdown/assets/clocks.schema.jsonc",
   "clocks": [
     {
       "label": "UTC",

@@ -18,7 +18,7 @@ class PyCountdownApp(PyRandyOSApp):
     APP_NAME: str = 'PyCountdown'
     APP_LOG_PREFIX = 'PyCountdown'
     APP_ASSETS_DIR = HERE/"assets"
-    APP_PATH_KEYS: tuple[str] = ('clocks_file',)
+    APP_PATH_KEYS: tuple[str] = ('clocks_file', 'local.clocks_file')
     APP_GLOBAL_DEFAULTS = {
         'clocks_file': './clocks.jsonc',
         CLOCKS_MTIME_KEY: None,
@@ -44,7 +44,14 @@ class PyCountdownApp(PyRandyOSApp):
 
     @classmethod
     def check_clocks_file(cls, force: bool = False):
-        clocks_file: Path = cls['clocks_file']
+        local: dict = cls.get_local_config()
+        clocks_file: Path = local.get('clocks_file')
+        if not clocks_file:
+            clocks_file: Path = cls.get('clocks_file')
+
+        if not clocks_file:
+            raise ValueError("No clocks file configured")
+
         old_mtime: float = cls[CLOCKS_MTIME_KEY]
         if clocks_file and clocks_file.exists():
             mtime = clocks_file.stat().st_mtime
