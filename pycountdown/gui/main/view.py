@@ -3,7 +3,7 @@ from functools import partial
 
 from pyrandyos.gui.qt import (
     QVBoxLayout, Qt, QToolBar, QTableWidget, QTableWidgetItem, QHeaderView,
-    QFont,
+    QFont, QObject, QEvent, QMainWindow
 )
 from pyrandyos.gui.callback import qt_callback
 from pyrandyos.gui.window import GuiWindowView
@@ -37,13 +37,33 @@ TABLE_CELL_DEFAULT_STYLE = 'background-color: black;'
 TABLE_STYLE = f"QTableWidget {{ background-color: black; }} QTableWidget::item {{ {TABLE_CELL_PADDING} {TABLE_CELL_DEFAULT_STYLE}  }}"  # noqa: E501
 
 
+class MainWindowFocusFilter(QObject):
+    def eventFilter(self, qtobj: QMainWindow, event: QEvent):
+        if event.type() == QEvent.Type.WindowActivate:
+            qtobj.setWindowOpacity(1)
+
+        elif event.type() == QEvent.Type.WindowDeactivate:
+            always_on_top = PyCountdownApp.get("local.always_on_top", False)
+            if always_on_top:
+                opacity = PyCountdownApp.get('local.always_on_top_opacity', 1)
+                qtobj.setWindowOpacity(opacity)
+
+        return False  # Continue standard event processing
+
+
 class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
     @log_func_call
     def __init__(self, basetitle: str, presenter: 'MainWindow' = None):
         super().__init__(basetitle, presenter)
         qtobj = self.qtobj
         qtobj.resize(*PyCountdownApp.get_default_win_size())
-        # qtobj.setMinimumSize(900, 600)
+        qtobj.setMinimumSize(325, 140)
+        qtobj.setWindowFlag(Qt.WindowStaysOnTopHint,
+                            PyCountdownApp.get("local.always_on_top", False))
+
+        focus_filter = MainWindowFocusFilter(qtobj)
+        qtobj.installEventFilter(focus_filter)
+        self.focus_filter = focus_filter
 
         layout = QVBoxLayout()
         self.layout = layout
