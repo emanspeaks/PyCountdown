@@ -17,7 +17,9 @@ from pyrandyos.gui.utils import (
 from ...app import PyCountdownApp
 from ...logging import log_func_call
 from ...lib.clocks.displayclocks import DisplayClock
-from ..gui_icons import ConfigIcon, AddClockIcon, RemoveClockIcon, RefreshIcon
+from ..gui_icons import (
+    ConfigIcon, AddClockIcon, RemoveClockIcon, RefreshIcon, ClocksJsonIcon
+)
 if TYPE_CHECKING:
     from .pres import MainWindow
 
@@ -79,7 +81,11 @@ class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
 
         toolbar.addWidget(create_toolbar_expanding_spacer())
 
-        toolbar.addAction(create_action(qtobj, "Config", ConfigIcon.icon(),
+        toolbar.addAction(create_action(qtobj, "Clocks Config",
+                                        ClocksJsonIcon.icon(),
+                                        pres.click_clocks_config))
+        toolbar.addAction(create_action(qtobj, "Program Config",
+                                        ConfigIcon.icon(),
                                         pres.click_config))
 
     @log_func_call

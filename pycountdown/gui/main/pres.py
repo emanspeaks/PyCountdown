@@ -10,6 +10,8 @@ from ...app import PyCountdownApp, CLOCKS_FILE_CHECK_SEC_KEY
 # from ...lib.clocks import DEFAULT_CLOCKS, Clock
 from ...lib.clocks.displayclocks import DisplayClock
 
+from ..dialogs.clocks_config import ClocksConfigDialog
+
 from .view import MainWindowView
 
 UserRole = Qt.UserRole
@@ -47,6 +49,11 @@ class MainWindow(GuiWindow[MainWindowView]):
     @log_func_call
     def click_config(self):
         dlg = ConfigTreeDialog(self)
+        dlg.show()
+
+    @log_func_call
+    def click_clocks_config(self):
+        dlg = ClocksConfigDialog(self)
         dlg.show()
 
     @log_func_call(DEBUGLOW2)

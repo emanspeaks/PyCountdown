@@ -22,6 +22,8 @@ dclock
 debugfmtstr
 DHMS
 dleap
+dlgbuttons
+dlgview
 dllerrs
 drivelist
 DriveList

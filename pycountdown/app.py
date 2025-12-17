@@ -43,7 +43,7 @@ class PyCountdownApp(PyRandyOSApp):
         return args
 
     @classmethod
-    def check_clocks_file(cls, force: bool = False):
+    def get_clocks_file_path(cls):
         local: dict = cls.get_local_config()
         clocks_file: Path = local.get('clocks_file')
         if not clocks_file:
@@ -52,6 +52,11 @@ class PyCountdownApp(PyRandyOSApp):
         if not clocks_file:
             raise ValueError("No clocks file configured")
 
+        return clocks_file
+
+    @classmethod
+    def check_clocks_file(cls, force: bool = False):
+        clocks_file = cls.get_clocks_file_path()
         old_mtime: float = cls[CLOCKS_MTIME_KEY]
         if clocks_file and clocks_file.exists():
             mtime = clocks_file.stat().st_mtime
