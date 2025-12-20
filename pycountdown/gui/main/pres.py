@@ -1,4 +1,4 @@
-from pyrandyos.gui.qt import QTimer, Qt
+from pyrandyos.gui.qt import QTimer, Qt, QFileDialog
 from pyrandyos.gui.callback import qt_callback
 from pyrandyos.gui.window import GuiWindow
 from pyrandyos.gui.dialogs.config import ConfigTreeDialog
@@ -11,6 +11,7 @@ from ...app import PyCountdownApp, CLOCKS_FILE_CHECK_SEC_KEY
 from ...lib.clocks.displayclocks import DisplayClock
 
 from ..dialogs.clocks_config import ClocksConfigDialog
+from ..dialogs.clock_editor import ClockEditorDialog
 
 from .view import MainWindowView
 
@@ -55,6 +56,15 @@ class MainWindow(GuiWindow[MainWindowView]):
     def click_clocks_config(self):
         dlg = ClocksConfigDialog(self)
         dlg.show()
+
+    @log_func_call
+    def click_saveas(self):
+        current_file = PyCountdownApp.get_clocks_file_path()
+        new_pathstr, filter = QFileDialog.getSaveFileName(
+            self.gui_view.qtobj, "Export Clocks File",
+            current_file.parent.as_posix(), "*.jsonc"
+        )
+        PyCountdownApp.export_clocks_file(new_pathstr)
 
     @log_func_call(DEBUGLOW2)
     def clock_tick(self):
@@ -106,6 +116,14 @@ class MainWindow(GuiWindow[MainWindowView]):
         # DisplayClock.add_to_pool(DisplayClock(
         #     'New clock', Clock(DEFAULT_CLOCKS['TAI'], now_tai_sec())))
         self.update_table()
+
+    @log_func_call
+    def add_timer(self):
+        # DisplayClock.add_to_pool(DisplayClock(
+        #     'New clock', Clock(DEFAULT_CLOCKS['TAI'], now_tai_sec())))
+        dlg = ClockEditorDialog(self)
+        dlg.show()
+        # self.update_table()
 
     @log_func_call
     def remove_clock(self, idx: int = -1):

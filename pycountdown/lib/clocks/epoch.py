@@ -50,8 +50,10 @@ class Epoch:
 
         return sec_as_fmt_str(self.epoch_sec, fmt, tmp_digits, tmp_zeropad)
 
-    def as_fmt(self, fmt: TimeFormatter | TimeFormat, digits: int = None):
+    def as_fmt(self, fmt: TimeFormatter | TimeFormat = None,
+               digits: int = None):
         t = self.epoch_sec
+        fmt = fmt or self.input_fmt
         return sec_as_fmt(t, fmt, digits)
 
     def to_tai(self, anchor: 'Clock' = None):

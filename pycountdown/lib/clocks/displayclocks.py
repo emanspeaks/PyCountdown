@@ -52,6 +52,15 @@ class DisplayClock:
             return DEFAULT_CLOCKS[DEFAULT_CLOCKS.keys()[idx]]
         return cls.pool[idx - defaultlen].clock
 
+    @classmethod
+    def get_id_for_clock(cls, clk: Clock):
+        for dclk in cls.pool:
+            if dclk and dclk.clock is clk:
+                return dclk.clk_id
+        for k, v in DEFAULT_CLOCKS.items():
+            if v is clk:
+                return k
+
     # @classmethod
     # def get_clock_by_name(cls, name: str,
     #                       to_add: list['DisplayClock'] = None):

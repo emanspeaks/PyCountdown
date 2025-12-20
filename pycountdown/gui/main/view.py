@@ -18,7 +18,8 @@ from ...app import PyCountdownApp
 from ...logging import log_func_call
 from ...lib.clocks.displayclocks import DisplayClock
 from ..gui_icons import (
-    ConfigIcon, AddClockIcon, RemoveClockIcon, RefreshIcon, ClocksJsonIcon
+    ConfigIcon, AddClockIcon, RemoveClockIcon, RefreshIcon, ClocksJsonIcon,
+    SaveAsIcon, TimerIcon,
 )
 if TYPE_CHECKING:
     from .pres import MainWindow
@@ -92,12 +93,20 @@ class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
         toolbar.addAction(create_action(qtobj, "Refresh from file",
                                         RefreshIcon.icon(),
                                         partial(pres.refresh_clocks_file, True)))  # noqa: E501
+        toolbar.addAction(create_action(qtobj, "Add timer",
+                                        TimerIcon.icon(),
+                                        pres.add_timer))
         toolbar.addAction(create_action(qtobj, "Add clock",
                                         AddClockIcon.icon(),
                                         pres.add_clock, enabled=False))
         toolbar.addAction(create_action(qtobj, "Remove clock",
                                         RemoveClockIcon.icon(),
                                         pres.remove_clock, enabled=False))
+
+        toolbar.addSeparator()
+        toolbar.addAction(create_action(qtobj, "Save Clocks File As...",
+                                        SaveAsIcon.icon(),
+                                        pres.click_saveas))
 
         toolbar.addWidget(create_toolbar_expanding_spacer())
 

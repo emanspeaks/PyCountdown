@@ -1,11 +1,11 @@
 from pathlib import Path
 
 from pyrandyos import PyRandyOSApp
-from pyrandyos.utils.json import load_jsonc
+from pyrandyos.utils.json import load_jsonc, save_json
 from pyrandyos.config.keys import LOCAL_CONFIG_FILE_KEY
 
 from .logging import log_func_call
-from .lib.clocks.json import parse_clocks_jsonc
+from .lib.clocks.json import parse_clocks_jsonc, export_clocks_jsonc
 
 HERE = Path(__file__).parent
 
@@ -69,3 +69,11 @@ class PyCountdownApp(PyRandyOSApp):
                 DisplayClock.pool = clk_pool
                 ThresholdSet.pool = thresh_pool
                 return True
+
+    @classmethod
+    def export_clocks_file(cls, clocks_file: Path | str = None):
+        clocks_file = clocks_file or cls.get_clocks_file_path()
+        from .lib.clocks.displayclocks import DisplayClock
+        from .lib.clocks.fmt import ThresholdSet
+        data = export_clocks_jsonc(DisplayClock.pool, ThresholdSet.pool)
+        save_json(clocks_file, data)

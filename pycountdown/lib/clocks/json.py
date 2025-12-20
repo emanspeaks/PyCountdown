@@ -145,7 +145,7 @@ def parse_epoch(data: dict, pool: list[DisplayClock] = None,
 
     t, fmt = parse_epoch_time(data['t'],
                               parse_time_format(data.get('format', 's')))
-    fold_known: bool = data.get('dst_known', False)
+    fold_known: bool = data.get('fold_known', False)
     fold: bool = data.get('fold', False)
     return Epoch(clock, t, fold_known, fold, fmt)
 
@@ -238,3 +238,85 @@ def parse_clocks_jsonc(data: str | dict):
             ids_to_resolve.remove(resolve_tmp)
 
     return dclk_to_add, thresh_sets
+
+
+def export_clocks_jsonc(dclks: list[DisplayClock],
+                        thresh_sets: dict[str, ThresholdSet]):
+    return {
+        "$schema": "https://raw.githubusercontent.com/emanspeaks/PyCountdown/refs/heads/master/pycountdown/assets/clocks.schema.jsonc",  # noqa: E501
+        'threshold_sets': {k: export_threshold_set(v)
+                           for k, v in thresh_sets.items()},
+        'clocks': [export_clock(x) for x in dclks]
+    }
+
+
+def export_threshold_set(thrset: ThresholdSet):
+    return [export_threshold(x) for x in thrset.thresh_list]
+
+
+def export_threshold(x: ClockThreshold):
+    out = {'color': x.color.name()}
+    epoch = x.epoch
+    if epoch:
+        out['epoch'] = export_epoch(epoch)
+    return out
+
+
+def export_epoch(x: Epoch):
+    out = {
+        't': x.as_fmt(),
+        'format': x.input_fmt.name,
+        'fold_known': x.fold_known,
+        'fold': x.fold,
+    }
+    clk = x.clock
+    if clk:
+        out['clock'] = DisplayClock.get_id_for_clock(clk)
+
+    return out
+
+
+def export_clock(x: DisplayClock):
+    if x is None:
+        return {'blank': True}
+    out = {
+        'label': x.label,
+        'id': x.clk_id,
+        'display': export_formatter(x.formatter),
+    }
+    clk = x.clock
+    epoch = clk.epoch
+    ref = clk.ref
+    follow = clk.follow
+    rate = clk.rate
+    absclk = clk._abs
+
+    if epoch:
+        out['epoch'] = export_epoch(epoch)
+
+    if ref:
+        out['ref'] = export_epoch(ref)
+
+    if follow:
+        out['follow'] = DisplayClock.get_id_for_clock(follow)
+
+    if rate:
+        out['rate'] = rate.name
+
+    if absclk:
+        out['_abs'] = absclk
+
+    return out
+
+
+def export_formatter(fmt: ClockFormatter):
+    if fmt is None:
+        return {}
+    return {
+        'color': fmt.color.name(),
+        'digits': fmt.digits,
+        'hidden': fmt.hidden,
+        'thresh_set': fmt.thresh_set,
+        'time_format': fmt.time_format.name,
+        'zeropad': fmt.zeropad,
+    }
