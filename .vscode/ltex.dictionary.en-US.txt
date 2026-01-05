@@ -171,6 +171,7 @@ vscode-codicons
 waivable
 Wimberly
 YDHMS
+ydoy
 ymdhms
 YMDHMSKEYS
 ymdhmsms

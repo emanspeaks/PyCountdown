@@ -7,9 +7,9 @@ from pyrandyos.gui.qt import (
 )
 from pyrandyos.gui.dialogs import GuiDialogView
 from pyrandyos.gui.callback import qt_callback
-# from pyrandyos.gui.widgets.json_edit import JsonEditorWidget
-
-from ...widgets.dhms import DhmsWidget
+from pyrandyos.gui.widgets.dhms import DhmsWidget
+from pyrandyos.gui.widgets.ymdhms import YmdhmsWidget
+from pyrandyos.gui.widgets.y_doy_hms import YDoyHmsWidget
 
 if TYPE_CHECKING:
     from .pres import ClockEditorDialog
@@ -55,17 +55,18 @@ class ClockEditorDialogView(GuiDialogView['ClockEditorDialog']):
 
     @log_func_call
     def create_editor(self):
+        # qtobj = self.qtobj
+        # pres = self.gui_pres
         layout = self.layout
 
         dhms = DhmsWidget(self)
         layout.addWidget(dhms.qtobj)
         self.dhms = dhms
 
-        # qtobj = self.qtobj
-        # pres = self.gui_pres
+        ymdhms = YmdhmsWidget(self)
+        layout.addWidget(ymdhms.qtobj)
+        self.ymdhms = ymdhms
 
-        # editor = JsonEditorWidget(self)
-        # layout.addWidget(editor.qtobj)
-        # self.editor = editor
-
-        # editor.set_text(pres.load_clocks_file())
+        y_doy_hms = YDoyHmsWidget(self)
+        layout.addWidget(y_doy_hms.qtobj)
+        self.y_doy_hms = y_doy_hms

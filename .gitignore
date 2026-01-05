@@ -11,6 +11,6 @@ __pycache__/
 docs/
 .vscode/settings.json
 .coverage
-.conda
+.conda/
 logs/
 tmp/
