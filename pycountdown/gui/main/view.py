@@ -3,7 +3,7 @@ from functools import partial
 
 from pyrandyos.gui.qt import (
     QVBoxLayout, Qt, QToolBar, QTableWidget, QTableWidgetItem, QHeaderView,
-    QFont, QObject, QEvent, QMainWindow
+    QObject, QEvent, QMainWindow
 )
 from pyrandyos.gui.callback import qt_callback
 from pyrandyos.gui.window import GuiWindowView
@@ -26,8 +26,6 @@ if TYPE_CHECKING:
 
 UserRole = Qt.UserRole
 
-MONO_FONT = QFont("Consolas, Monaco, monospace")
-MONO_FONT.setStyleHint(QFont.Monospace)
 TABLE_TPAD = 2  # one sided
 TABLE_LPAD = 4  # one sided
 TABLE_VPAD = TABLE_TPAD*2  # two sided
@@ -164,13 +162,14 @@ class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
         rowcount = len(clocks)
         table.clearContents()
         table.setRowCount(rowcount)
+        font = self.gui_app.get_monofont()
         for i, row in enumerate(clocks):
             item = QTableWidgetItem(row.label if row else '')
-            item.setFont(MONO_FONT)
+            item.setFont(font)
             table.setItem(i, 0, item)
 
             item = QTableWidgetItem("Loading...")
             item.setData(UserRole, row)
             item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-            item.setFont(MONO_FONT)
+            item.setFont(font)
             table.setItem(i, 1, item)
