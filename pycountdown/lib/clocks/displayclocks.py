@@ -17,11 +17,15 @@ class DisplayClock:
         self.clock = clock
         self.formatter = formatter
         fmt = formatter.time_format
-        formatter.time_format = fmt or (TimeFormat.YMDHMS if clock.is_abs()
+        formatter.time_format = fmt or (TimeFormat.YMDHMS
+                                        if clock and clock.is_abs()
                                         else TimeFormat.DHMS)
 
     def display(self, now_tai: float, fmt: ClockFormatter = None):
-        return self.clock.display(now_tai, fmt or self.formatter)
+        clock = self.clock
+        if clock:
+            return clock.display(now_tai, fmt or self.formatter)
+        return ""
 
     @property
     def hidden(self):

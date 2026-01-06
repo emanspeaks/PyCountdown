@@ -197,11 +197,16 @@ def parse_clocks_jsonc(data: str | dict):
         for resolve_tmp in ids_to_resolve.copy():
             i, clk_id = resolve_tmp
             row = clocks[i]
-            if clk_id is None and row.get('blank'):
-                ids_to_resolve.remove(resolve_tmp)
-                continue
-
+            blank = row.get('blank')
             label = label_list[i]
+            display_fmt = parse_display(row.get('display')) or ClockFormatter()
+            if blank:
+                ids_to_resolve.remove(resolve_tmp)
+                if clk_id:
+                    dclk_to_add[i] = DisplayClock(clk_id, label, None,
+                                                  display_fmt)
+
+                continue
 
             json_follow = row.get('follow')
             follow = get_clock_by_id(json_follow, dclk_to_add, id2idx,
@@ -232,7 +237,6 @@ def parse_clocks_jsonc(data: str | dict):
 
             clock = Clock(epoch, ref, follow, rate, offset_sec, _abs)
 
-            display_fmt = parse_display(row.get('display')) or ClockFormatter()
             dclk_to_add[i] = DisplayClock(clk_id, label, clock, display_fmt)
 
             ids_to_resolve.remove(resolve_tmp)

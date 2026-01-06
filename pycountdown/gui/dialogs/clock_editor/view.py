@@ -7,9 +7,9 @@ from pyrandyos.gui.qt import (
 )
 from pyrandyos.gui.dialogs import GuiDialogView
 from pyrandyos.gui.callback import qt_callback
-from pyrandyos.gui.widgets.dhms import DhmsWidget
-from pyrandyos.gui.widgets.ymdhms import YmdhmsWidget
-from pyrandyos.gui.widgets.y_doy_hms import YDoyHmsWidget
+from pyrandyos.gui.widgets.time_edit.dhms import DhmsWidget
+from pyrandyos.gui.widgets.time_edit.ymdhms import YmdhmsWidget
+from pyrandyos.gui.widgets.time_edit.y_doy_hms import YDoyHmsWidget
 
 if TYPE_CHECKING:
     from .pres import ClockEditorDialog

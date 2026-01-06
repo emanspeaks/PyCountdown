@@ -168,7 +168,8 @@ class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
             item.setFont(font)
             table.setItem(i, 0, item)
 
-            item = QTableWidgetItem("Loading...")
+            clk = row.clock if row else None
+            item = QTableWidgetItem("Loading..." if clk else "")
             item.setData(UserRole, row)
             item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             item.setFont(font)
