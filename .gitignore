@@ -14,3 +14,4 @@ docs/
 .conda/
 logs/
 tmp/
+/pycountdown/_version.py
