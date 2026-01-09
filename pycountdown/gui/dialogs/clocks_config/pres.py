@@ -1,8 +1,9 @@
 from typing import TYPE_CHECKING
+from pathlib import Path
 
 from pyrandyos.gui.widgets import GuiWindowLikeParentType
 from pyrandyos.gui.dialogs import GuiDialog
-from pyrandyos.gui.qt import QAbstractButton, QDialogButtonBox
+from pyrandyos.gui.qt import QAbstractButton, QDialogButtonBox, QFileDialog
 
 from ....logging import log_func_call
 from ....app import PyCountdownApp
@@ -21,16 +22,22 @@ class ClocksConfigDialog(GuiDialog[ClocksConfigDialogView]):
     @log_func_call
     def load_clocks_file(self):
         clocks_file = PyCountdownApp.get_clocks_file_path()
-        return clocks_file.read_text()
+        return (clocks_file.read_text() if clocks_file and clocks_file.exists()
+                else "")
 
     @log_func_call
-    def save_clicked(self, btn: QAbstractButton = None):
+    def dlgbtn_clicked(self, btn: QAbstractButton = None):
         dlgview = self.gui_view
         buttons = dlgview.dlgbuttons
+        if btn is buttons.button(QDialogButtonBox.Cancel):
+            self.gui_view.qtobj.reject()
+            return
 
-        self.save_clocks_file()
+        if self.save_clocks_file() is None:
+            return
         mw: 'MainWindow' = self.gui_parent
         mw.refresh_clocks_file(True)
+
         if btn is buttons.button(QDialogButtonBox.Ok):
             self.gui_view.qtobj.accept()
 
@@ -39,8 +46,21 @@ class ClocksConfigDialog(GuiDialog[ClocksConfigDialogView]):
         dlgview = self.gui_view
         editor = dlgview.editor
         txt = editor.get_text()
+
         clocks_file = PyCountdownApp.get_clocks_file_path()
-        return clocks_file.write_text(txt)
+        if not clocks_file or not clocks_file.exists():
+            new_pathstr, filter = QFileDialog.getSaveFileName(
+                self.gui_view.qtobj, "Export Clocks File",
+                '.', "*.jsonc"
+            )
+            if new_pathstr:
+                clocks_file = Path(new_pathstr)
+                clocks_file.touch(exist_ok=True)
+                PyCountdownApp.set_clocks_file_path(clocks_file)
+
+        if clocks_file:
+            return clocks_file.write_text(txt)
+        return None
 
     @log_func_call
     def show(self):

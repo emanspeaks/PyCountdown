@@ -246,10 +246,11 @@ def parse_clocks_jsonc(data: str | dict):
 
 def export_clocks_jsonc(dclks: list[DisplayClock],
                         thresh_sets: dict[str, ThresholdSet]):
+    thresh_items = thresh_sets.items() if thresh_sets else ()
     return {
         "$schema": "https://raw.githubusercontent.com/emanspeaks/PyCountdown/refs/heads/master/pycountdown/assets/clocks.schema.jsonc",  # noqa: E501
         'threshold_sets': {k: export_threshold_set(v)
-                           for k, v in thresh_sets.items()},
+                           for k, v in thresh_items},
         'clocks': [export_clock(x) for x in dclks]
     }
 

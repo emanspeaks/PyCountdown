@@ -24,6 +24,7 @@ dclock
 debugfmtstr
 DHMS
 dleap
+dlgbtn
 dlgbuttons
 dlgview
 dllerrs

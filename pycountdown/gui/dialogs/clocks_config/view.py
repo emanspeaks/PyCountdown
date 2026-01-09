@@ -12,6 +12,8 @@ from pyrandyos.gui.widgets.json_edit import JsonEditorWidget
 if TYPE_CHECKING:
     from .pres import ClocksConfigDialog
 
+from . import monkeypatch  # noqa: F401
+
 
 class ClocksConfigDialogView(GuiDialogView['ClocksConfigDialog']):
     @log_func_call
@@ -31,7 +33,7 @@ class ClocksConfigDialogView(GuiDialogView['ClocksConfigDialog']):
         qtobj = self.qtobj
         pres = self.gui_pres
         save_shortcut = QShortcut(QKeySequence(Qt.CTRL+Qt.Key_S), qtobj)
-        save_shortcut.activated.connect(qt_callback(pres.save_clicked))
+        save_shortcut.activated.connect(qt_callback(pres.dlgbtn_clicked))
         self.save_shortcut = save_shortcut
 
     @log_func_call
@@ -47,7 +49,7 @@ class ClocksConfigDialogView(GuiDialogView['ClocksConfigDialog']):
         dlgbuttons = QDialogButtonBox(btns, qtobj)
         # dlgbuttons.accepted.connect(qt_callback(pres.save_and_close))
         dlgbuttons.rejected.connect(qtobj.reject)
-        dlgbuttons.clicked.connect(qt_callback(pres.save_clicked))
+        dlgbuttons.clicked.connect(qt_callback(pres.dlgbtn_clicked))
         hbox.addStretch()
         hbox.addWidget(dlgbuttons)
         self.dlgbuttons = dlgbuttons

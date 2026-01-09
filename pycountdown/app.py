@@ -57,14 +57,14 @@ class PyCountdownApp(PyRandyOSApp):
     @classmethod
     def set_clocks_file_path(cls, path: Path | str = None,
                              clear: bool = False):
-        clocks_file = None if clear else Path(path)
+        clocks_file = None if clear or not path else Path(path)
         if clear or clocks_file.exists():
             local: dict = cls.get_local_config()
             local['clocks_file'] = clocks_file
             if clear:
                 cls.set('clocks_file', None)
 
-            return cls.check_clocks_file(True)
+            # return cls.check_clocks_file(True)
 
     @classmethod
     def check_clocks_file(cls, force: bool = False):

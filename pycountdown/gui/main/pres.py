@@ -75,13 +75,14 @@ class MainWindow(GuiWindow[MainWindowView]):
             self.gui_view.qtobj, "Open Clocks File",
             default_dir, "*.jsonc"
         )
-        if PyCountdownApp.set_clocks_file_path(open_pathstr):
-            self.update_table()
+        if open_pathstr:
+            PyCountdownApp.set_clocks_file_path(open_pathstr)
+            self.refresh_clocks_file(True)
 
     @log_func_call
     def click_new(self):
         PyCountdownApp.set_clocks_file_path(clear=True)
-        self.update_table()
+        self.refresh_clocks_file(True)
 
     @log_func_call(DEBUGLOW2)
     def clock_tick(self):
@@ -104,10 +105,10 @@ class MainWindow(GuiWindow[MainWindowView]):
             item.setText(txt)
 
     @log_func_call(DEBUGLOW2)
-    def refresh_clocks_file(self, clicked: bool = False):
-        logfunc = log_info if clicked else log_debuglow
+    def refresh_clocks_file(self, force: bool = False):
+        logfunc = log_info if force else log_debuglow
         logfunc('checking clocks file')
-        if PyCountdownApp.check_clocks_file(clicked):
+        if PyCountdownApp.check_clocks_file(force):
             log_info('clocks file reloaded')
             self.update_table()
 
