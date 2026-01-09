@@ -60,11 +60,28 @@ class MainWindow(GuiWindow[MainWindowView]):
     @log_func_call
     def click_saveas(self):
         current_file = PyCountdownApp.get_clocks_file_path()
+        default_dir = current_file.parent.as_posix() if current_file else "."
         new_pathstr, filter = QFileDialog.getSaveFileName(
             self.gui_view.qtobj, "Export Clocks File",
-            current_file.parent.as_posix(), "*.jsonc"
+            default_dir, "*.jsonc"
         )
         PyCountdownApp.export_clocks_file(new_pathstr)
+
+    @log_func_call
+    def click_open(self):
+        current_file = PyCountdownApp.get_clocks_file_path()
+        default_dir = current_file.parent.as_posix() if current_file else "."
+        open_pathstr, filter = QFileDialog.getOpenFileName(
+            self.gui_view.qtobj, "Open Clocks File",
+            default_dir, "*.jsonc"
+        )
+        if PyCountdownApp.set_clocks_file_path(open_pathstr):
+            self.update_table()
+
+    @log_func_call
+    def click_new(self):
+        PyCountdownApp.set_clocks_file_path(clear=True)
+        self.update_table()
 
     @log_func_call(DEBUGLOW2)
     def clock_tick(self):

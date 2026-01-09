@@ -49,26 +49,46 @@ class PyCountdownApp(PyRandyOSApp):
         if not clocks_file:
             clocks_file: Path = cls.get('clocks_file')
 
-        if not clocks_file:
-            raise ValueError("No clocks file configured")
+        # if not clocks_file:
+        #     raise ValueError("No clocks file configured")
 
         return clocks_file
+
+    @classmethod
+    def set_clocks_file_path(cls, path: Path | str = None,
+                             clear: bool = False):
+        clocks_file = None if clear else Path(path)
+        if clear or clocks_file.exists():
+            local: dict = cls.get_local_config()
+            local['clocks_file'] = clocks_file
+            if clear:
+                cls.set('clocks_file', None)
+
+            return cls.check_clocks_file(True)
 
     @classmethod
     def check_clocks_file(cls, force: bool = False):
         clocks_file = cls.get_clocks_file_path()
         old_mtime: float = cls[CLOCKS_MTIME_KEY]
+        mtime = None
         if clocks_file and clocks_file.exists():
             mtime = clocks_file.stat().st_mtime
-            if force or mtime != old_mtime:
-                from .lib.clocks.displayclocks import DisplayClock
-                from .lib.clocks.fmt import ThresholdSet
-                cls.set(CLOCKS_MTIME_KEY, mtime)
+
+        if force or mtime != old_mtime:
+            from .lib.clocks.displayclocks import DisplayClock
+            from .lib.clocks.fmt import ThresholdSet
+            cls.set(CLOCKS_MTIME_KEY, mtime)
+            if clocks_file:
                 clocks_jsonc = load_jsonc(clocks_file)
                 clk_pool, thresh_pool = parse_clocks_jsonc(clocks_jsonc)
-                DisplayClock.pool = clk_pool
-                ThresholdSet.pool = thresh_pool
-                return True
+
+            else:
+                clk_pool = []
+                thresh_pool = []
+
+            DisplayClock.pool = clk_pool
+            ThresholdSet.pool = thresh_pool
+            return True
 
     @classmethod
     def export_clocks_file(cls, clocks_file: Path | str = None):

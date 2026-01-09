@@ -19,6 +19,8 @@ BulletClockIconLayer = IconLayer(*BulletClockFontGlyph, 'white')
 
 TimerIcon = IconSpec.generate_iconspec(FluentUI, glyph=fluentui_names.ic_fluent_clock_alarm_20_regular)  # noqa: E501
 SaveAsIcon = IconSpec.generate_iconspec(Codicons, glyph=codicons_names.save_as)  # noqa: E501
+NewIcon = IconSpec.generate_iconspec(Codicons, glyph=codicons_names.new_file)  # noqa: E501
+OpenIcon = IconSpec.generate_iconspec(Codicons, glyph=codicons_names.folder_opened)  # noqa: E501
 ClocksJsonIcon = IconSpec(IconStateSpec([JsonIconLayer, ClockIconLayer]))  # noqa: E501
 ProgramIcon = IconSpec(IconStateSpec([SolidSquareIconLayer, BulletClockIconLayer]))  # noqa: E501
 ConfigIcon = IconSpec.generate_iconspec(Codicons, glyph=codicons_names.json)

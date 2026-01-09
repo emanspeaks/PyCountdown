@@ -19,7 +19,7 @@ from ...logging import log_func_call
 from ...lib.clocks.displayclocks import DisplayClock
 from ..gui_icons import (
     ConfigIcon, AddClockIcon, RemoveClockIcon, RefreshIcon, ClocksJsonIcon,
-    SaveAsIcon, TimerIcon,
+    SaveAsIcon, TimerIcon, OpenIcon, NewIcon,
 )
 if TYPE_CHECKING:
     from .pres import MainWindow
@@ -88,20 +88,26 @@ class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
         qtobj.addToolBar(Qt.TopToolBarArea, toolbar)
         self.name_toolbar = toolbar
 
-        toolbar.addAction(create_action(qtobj, "Refresh from file",
-                                        RefreshIcon.icon(),
-                                        partial(pres.refresh_clocks_file, True)))  # noqa: E501
-        toolbar.addAction(create_action(qtobj, "Add timer",
-                                        TimerIcon.icon(),
-                                        pres.add_timer))
         toolbar.addAction(create_action(qtobj, "Add clock",
                                         AddClockIcon.icon(),
                                         pres.add_clock, enabled=False))
         toolbar.addAction(create_action(qtobj, "Remove clock",
                                         RemoveClockIcon.icon(),
                                         pres.remove_clock, enabled=False))
+        toolbar.addAction(create_action(qtobj, "Add timer",
+                                        TimerIcon.icon(),
+                                        pres.add_timer))
 
         toolbar.addSeparator()
+        toolbar.addAction(create_action(qtobj, "Refresh from file",
+                                        RefreshIcon.icon(),
+                                        partial(pres.refresh_clocks_file, True)))  # noqa: E501
+        toolbar.addAction(create_action(qtobj, "New Clocks File",
+                                        NewIcon.icon(),
+                                        pres.click_new))
+        toolbar.addAction(create_action(qtobj, "Open Clocks File...",
+                                        OpenIcon.icon(),
+                                        pres.click_open))
         toolbar.addAction(create_action(qtobj, "Save Clocks File As...",
                                         SaveAsIcon.icon(),
                                         pres.click_saveas))
