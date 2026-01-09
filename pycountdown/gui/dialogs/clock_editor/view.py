@@ -33,7 +33,7 @@ class ClockEditorDialogView(GuiDialogView['ClockEditorDialog']):
         qtobj = self.qtobj
         pres = self.gui_pres
         save_shortcut = QShortcut(QKeySequence(Qt.CTRL+Qt.Key_S), qtobj)
-        save_shortcut.activated.connect(qt_callback(pres.save_clicked))
+        save_shortcut.activated.connect(qt_callback(pres.dlgbtn_clicked))
         self.save_shortcut = save_shortcut
 
     @log_func_call
@@ -48,7 +48,7 @@ class ClockEditorDialogView(GuiDialogView['ClockEditorDialog']):
         btns = QDialogButtonBox.Ok | QDialogButtonBox.Cancel | QDialogButtonBox.Save  # noqa: E501
         dlgbuttons = QDialogButtonBox(btns, qtobj)
         dlgbuttons.rejected.connect(qtobj.reject)
-        dlgbuttons.clicked.connect(qt_callback(pres.save_clicked))
+        dlgbuttons.clicked.connect(qt_callback(pres.dlgbtn_clicked))
         hbox.addStretch()
         hbox.addWidget(dlgbuttons)
         self.dlgbuttons = dlgbuttons

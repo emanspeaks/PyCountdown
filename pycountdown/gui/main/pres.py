@@ -125,8 +125,13 @@ class MainWindow(GuiWindow[MainWindowView]):
         """
         table = self.gui_view.clock_table
         items = [table.item(row, col) for col in range(table.columnCount())]
-        items
-        log_info(f'Row {row} clicked')
+        # label = items[0].text()
+        dclk = items[1].data(UserRole)
+        idx = DisplayClock.get_idx_for_visible_idx(row)
+        log_info(f'Row {row} Index {idx} clicked')
+
+        dlg = ClockEditorDialog(self, dclk)
+        dlg.show()
         # get_gui_app().qtobj.clipboard().setText(log_line)
 
     @log_func_call

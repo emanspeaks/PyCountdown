@@ -32,7 +32,7 @@ class ClockEditorDialog(GuiDialog[ClockEditorDialogView]):
         pass
 
     @log_func_call
-    def save_clicked(self, btn: QAbstractButton = None):
+    def dlgbtn_clicked(self, btn: QAbstractButton = None):
         dlgview = self.gui_view
         buttons = dlgview.dlgbuttons
 
