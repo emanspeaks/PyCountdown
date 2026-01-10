@@ -1,9 +1,11 @@
+from pyrandyos.utils.time.now import now_tai_sec
 from pyrandyos.utils.time.fmt import TimeFormat
 from pyrandyos.utils.casesafe import (
     casesafe_dict_get, casesafe_key_in_dict,
     casesafe_value_in_container, casesafe_is_equal,
 )
 
+from .epoch import Epoch
 from .clock import Clock, DEFAULT_CLOCKS
 from .fmt import ClockFormatter
 
@@ -86,6 +88,8 @@ class DisplayClock:
 
     @classmethod
     def get_clock_for_id(cls, clk_id: str):
+        if clk_id == NOW_ID:
+            return Clock(Epoch(DEFAULT_CLOCKS['TAI'], now_tai_sec()))
         if casesafe_key_in_dict(DEFAULT_CLOCKS, clk_id, True):
             return casesafe_dict_get(DEFAULT_CLOCKS, clk_id, None, True)
         pool_ids = cls.get_pool_ids()

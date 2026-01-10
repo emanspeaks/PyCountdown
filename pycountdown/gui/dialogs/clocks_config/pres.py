@@ -47,17 +47,10 @@ class ClocksConfigDialog(GuiDialog[ClocksConfigDialogView]):
         editor = dlgview.editor
         txt = editor.get_text()
 
+        mw: 'MainWindow' = self.gui_parent
+        if not mw.set_save_path_if_unset():
+            return None
         clocks_file = PyCountdownApp.get_clocks_file_path()
-        if not clocks_file or not clocks_file.exists():
-            new_pathstr, filter = QFileDialog.getSaveFileName(
-                self.gui_view.qtobj, "Export Clocks File",
-                '.', "*.jsonc"
-            )
-            if new_pathstr:
-                clocks_file = Path(new_pathstr)
-                clocks_file.touch(exist_ok=True)
-                PyCountdownApp.set_clocks_file_path(clocks_file)
-
         if clocks_file:
             return clocks_file.write_text(txt)
         return None

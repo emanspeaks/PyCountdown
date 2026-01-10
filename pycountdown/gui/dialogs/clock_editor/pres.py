@@ -42,9 +42,9 @@ class ClockEditorDialog(GuiDialog[ClockEditorDialogView]):
         if self.new:
             DisplayClock.pool.append(self.dclk)
 
-        clocks_file = PyCountdownApp.get_clocks_file_path()
-        if clocks_file and clocks_file.exists():
-            PyCountdownApp.export_clocks_file()
+        # clocks_file = PyCountdownApp.get_clocks_file_path()
+        # if clocks_file and clocks_file.exists():
+        #     PyCountdownApp.export_clocks_file()
 
     @log_func_call
     def dlgbtn_clicked(self, btn: QAbstractButton = None):
@@ -55,9 +55,12 @@ class ClockEditorDialog(GuiDialog[ClockEditorDialogView]):
             self.gui_view.qtobj.reject()
             return
 
-        self.save_clock()
         mw: 'MainWindow' = self.gui_parent
-        mw.refresh_clocks_file(True)
+        if mw.set_save_path_if_unset():
+            self.save_clock()
+            PyCountdownApp.export_clocks_file()
+            mw.refresh_clocks_file(True)
+
         if btn is buttons.button(QDialogButtonBox.Ok):
             self.gui_view.qtobj.accept()
 

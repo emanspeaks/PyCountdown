@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from pyrandyos.gui.qt import QTimer, Qt, QFileDialog
 from pyrandyos.gui.callback import qt_callback
 from pyrandyos.gui.window import GuiWindow
@@ -57,6 +59,20 @@ class MainWindow(GuiWindow[MainWindowView]):
         dlg = ClocksConfigDialog(self)
         dlg.show()
 
+    def set_save_path_if_unset(self):
+        clocks_file = PyCountdownApp.get_clocks_file_path()
+        if clocks_file and clocks_file.exists():
+            return True
+        new_pathstr, filter = QFileDialog.getSaveFileName(
+            self.gui_view.qtobj, "Export Clocks File",
+            '.', "*.jsonc"
+        )
+        if new_pathstr:
+            clocks_file = Path(new_pathstr)
+            clocks_file.touch(exist_ok=True)
+            PyCountdownApp.set_clocks_file_path(clocks_file)
+            return True
+
     @log_func_call
     def click_saveas(self):
         current_file = PyCountdownApp.get_clocks_file_path()
@@ -65,7 +81,8 @@ class MainWindow(GuiWindow[MainWindowView]):
             self.gui_view.qtobj, "Export Clocks File",
             default_dir, "*.jsonc"
         )
-        PyCountdownApp.export_clocks_file(new_pathstr)
+        if new_pathstr:
+            PyCountdownApp.export_clocks_file(new_pathstr)
 
     @log_func_call
     def click_open(self):

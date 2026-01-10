@@ -89,8 +89,8 @@ def create_default_clocks():
     us_mt = Clock(None, rate=BaseClockRate.US_MT)
     us_pt = Clock(None, rate=BaseClockRate.US_PT)
 
-    unix = Clock(utc, UNIX_UTC_SEC, rate=BaseClockRate.UNIX)
-    gpst = Clock(tai, GPST_EPOCH_TAI)
+    unix = Clock(Epoch(utc, UNIX_UTC_SEC), rate=BaseClockRate.UNIX)
+    gpst = Clock(Epoch(tai, GPST_EPOCH_TAI))
 
     return {
         'UTC': utc,
