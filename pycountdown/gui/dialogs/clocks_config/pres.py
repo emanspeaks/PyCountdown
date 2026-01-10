@@ -1,9 +1,8 @@
 from typing import TYPE_CHECKING
-from pathlib import Path
 
 from pyrandyos.gui.widgets import GuiWindowLikeParentType
 from pyrandyos.gui.dialogs import GuiDialog
-from pyrandyos.gui.qt import QAbstractButton, QDialogButtonBox, QFileDialog
+from pyrandyos.gui.qt import QAbstractButton, QDialogButtonBox
 
 from ....logging import log_func_call
 from ....app import PyCountdownApp
