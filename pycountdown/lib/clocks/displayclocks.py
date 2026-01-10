@@ -1,9 +1,15 @@
 from pyrandyos.utils.time.fmt import TimeFormat
+from pyrandyos.utils.casesafe import (
+    casesafe_dict_get, casesafe_key_in_dict,
+    casesafe_value_in_container, casesafe_is_equal,
+)
 
 from .clock import Clock, DEFAULT_CLOCKS
 from .fmt import ClockFormatter
 
 JsonEpochType = float | int | list[float | int]
+
+NOW_ID = '__now'
 
 
 class DisplayClock:
@@ -36,6 +42,10 @@ class DisplayClock:
         return [x.label for x in cls.pool]
 
     @classmethod
+    def get_pool_ids(cls):
+        return [x.clk_id for x in cls.pool]
+
+    @classmethod
     def get_idx_for_visible_idx(cls, visible_idx: int):
         j = 0
         for i, x in enumerate(cls.pool):
@@ -48,6 +58,15 @@ class DisplayClock:
     @classmethod
     def get_dclock_names_full_list(cls):
         return list(DEFAULT_CLOCKS.keys()) + cls.get_pool_names()
+
+    @classmethod
+    def get_dclock_ids_full_list(cls):
+        return list(DEFAULT_CLOCKS.keys()) + cls.get_pool_ids()
+
+    @classmethod
+    def get_dclock_name_id_full_list(cls):
+        return tuple(zip(cls.get_dclock_names_full_list(),
+                         cls.get_dclock_ids_full_list()))
 
     @classmethod
     def dclock_full_list_idx_to_clock(cls, idx: int):
@@ -65,15 +84,13 @@ class DisplayClock:
             if v is clk:
                 return k
 
-    # @classmethod
-    # def get_clock_by_name(cls, name: str,
-    #                       to_add: list['DisplayClock'] = None):
-    #     if casesafe_key_in_dict(DEFAULT_CLOCKS, name, True):
-    #         return casesafe_dict_get(DEFAULT_CLOCKS, name, None, True)
-    #     poolnames = ([x.label if x else None for x in to_add] if to_add
-    #                  else cls.get_pool_names())
-    #     if casesafe_value_in_container(poolnames, name, True):
-    #         for i, x in enumerate(poolnames):
-    #             if casesafe_is_equal(x, name, True):
-    #                 dclk = to_add[i] if to_add else cls.pool[i]
-    #                 return dclk.clock
+    @classmethod
+    def get_clock_for_id(cls, clk_id: str):
+        if casesafe_key_in_dict(DEFAULT_CLOCKS, clk_id, True):
+            return casesafe_dict_get(DEFAULT_CLOCKS, clk_id, None, True)
+        pool_ids = cls.get_pool_ids()
+        if casesafe_value_in_container(pool_ids, clk_id, True):
+            for i, x in enumerate(pool_ids):
+                if casesafe_is_equal(x, clk_id, True):
+                    dclk = cls.pool[i]
+                    return dclk.clock

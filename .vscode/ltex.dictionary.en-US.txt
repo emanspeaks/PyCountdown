@@ -9,6 +9,8 @@ cfgdict
 cfgpkgdir
 chgrp
 clippy
+clkid
+clklst
 clscache
 Consolas
 cpbase
@@ -24,6 +26,7 @@ dclock
 debugfmtstr
 DHMS
 dleap
+dlen
 dlgbtn
 dlgbuttons
 dlgview
@@ -59,6 +62,7 @@ jdumps
 jloads
 klass
 lastc
+lastf
 levelno
 loadf
 logcfg
@@ -135,6 +139,7 @@ sstr
 STARTBRAK
 stmp
 str
+tcheck
 Teph
 tgtdir
 tkbasewidget
@@ -147,6 +152,7 @@ toolbtn
 TPAD
 tparse
 tqdm
+tset
 ttffile
 TTRANS
 txtbox
@@ -165,6 +171,7 @@ venv
 vflip
 vheader
 vint
+vlayout
 vline
 VPAD
 VSCode

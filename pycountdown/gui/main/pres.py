@@ -124,31 +124,30 @@ class MainWindow(GuiWindow[MainWindowView]):
         original log line to the clipboard.
         """
         table = self.gui_view.clock_table
-        items = [table.item(row, col) for col in range(table.columnCount())]
-        # label = items[0].text()
-        dclk = items[1].data(UserRole)
+        # items = [table.item(row, col) for col in range(table.columnCount())]
+        dclk = table.item(row, 1).data(UserRole)
         idx = DisplayClock.get_idx_for_visible_idx(row)
         log_info(f'Row {row} Index {idx} clicked')
 
         dlg = ClockEditorDialog(self, dclk)
         dlg.show()
-        # get_gui_app().qtobj.clipboard().setText(log_line)
 
     @log_func_call
     def add_clock(self):
-        # DisplayClock.add_to_pool(DisplayClock(
-        #     'New clock', Clock(DEFAULT_CLOCKS['TAI'], now_tai_sec())))
+        dlg = ClockEditorDialog(self)
+        dlg.show()
         self.update_table()
 
     @log_func_call
     def add_timer(self):
         # DisplayClock.add_to_pool(DisplayClock(
         #     'New clock', Clock(DEFAULT_CLOCKS['TAI'], now_tai_sec())))
-        dlg = ClockEditorDialog(self)
+        dlg = ClockEditorDialog(self, timer=True)
         dlg.show()
-        # self.update_table()
+        self.update_table()
 
     @log_func_call
     def remove_clock(self, idx: int = -1):
         # DisplayClock.remove_from_pool(idx)
+        log_info(f"Removing clock at index {idx}")
         self.update_table()

@@ -90,10 +90,10 @@ class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
 
         toolbar.addAction(create_action(qtobj, "Add clock",
                                         AddClockIcon.icon(),
-                                        pres.add_clock, enabled=False))
+                                        pres.add_clock))
         toolbar.addAction(create_action(qtobj, "Remove clock",
                                         RemoveClockIcon.icon(),
-                                        pres.remove_clock, enabled=False))
+                                        pres.remove_clock))
         toolbar.addAction(create_action(qtobj, "Add timer",
                                         TimerIcon.icon(),
                                         pres.add_timer))
