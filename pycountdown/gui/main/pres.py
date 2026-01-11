@@ -19,6 +19,7 @@ from ..dialogs.clocks_config import ClocksConfigDialog
 from ..dialogs.clock_editor import ClockEditorDialog
 from ..dialogs.threshset_editor import ThreshSetEditorDialog
 from ..dialogs.config import ConfigTreeDialog
+from ..dialogs.apply_tset import ApplyTSetDialog
 
 from .view import MainWindowView
 
@@ -259,3 +260,20 @@ class MainWindow(GuiWindow[MainWindowView]):
         DisplayClock.move_down([table.item(r, 1).data(UserRole) for r in rows])
         PyCountdownApp.export_clocks_file()
         self.refresh_clocks_file(True)
+
+    @log_func_call
+    def click_apply_tset(self, rows: int | list[int] = None):
+        view = self.gui_view
+        table = view.clock_table
+        if rows is None:
+            rows = list({item.row() for item in table.selectedItems()})
+
+        elif isinstance(rows, int):
+            rows = [rows]
+
+        r_dclks: list[tuple[int, DisplayClock]] = [
+            (r, table.item(r, 1).data(UserRole)) for r in rows
+        ]
+        if r_dclks:
+            dlg = ApplyTSetDialog(self, r_dclks)
+            dlg.show()

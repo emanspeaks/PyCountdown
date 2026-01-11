@@ -87,6 +87,7 @@ noink
 noinks
 nrows
 octoface
+oldtset
 outf
 Pizetta
 ppath
@@ -158,6 +159,7 @@ TPAD
 tparse
 tqdm
 tset
+tsetlist
 ttffile
 TTRANS
 txtbox

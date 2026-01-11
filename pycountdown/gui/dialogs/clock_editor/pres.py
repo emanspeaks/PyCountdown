@@ -49,11 +49,9 @@ class ClockEditorDialog(GuiDialog[ClockEditorDialogView]):
     def dlgbtn_clicked(self, btn: QAbstractButton = None):
         dlgview = self.gui_view
         buttons = dlgview.dlgbuttons
-
         if btn is buttons.button(QDialogButtonBox.Cancel):
             self.gui_view.qtobj.reject()
             return
-
         mw: 'MainWindow' = self.gui_parent
         if mw.set_save_path_if_unset():
             self.save_clock()
@@ -227,4 +225,4 @@ class ClockEditorDialog(GuiDialog[ClockEditorDialogView]):
         view.threshset_chk.setChecked(checked)
         view.threshset.qtobj.setEnabled(checked)
         # view.color_btn.qtobj.setEnabled(not checked)
-        view.color_btn.qtobj.setVisible(not checked)
+        # view.color_btn.qtobj.setVisible(not checked)

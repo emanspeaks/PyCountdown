@@ -40,3 +40,4 @@ UpArrowIcon = IconSpec.generate_iconspec(Codicons, glyph=codicons_names.arrow_up
 DownArrowIcon = IconSpec.generate_iconspec(Codicons, glyph=codicons_names.arrow_down)  # noqa: E501
 CopyIcon = IconSpec.generate_iconspec(Codicons, glyph=codicons_names.copy)  # noqa: E501
 ThresholdSetIcon = IconSpec.generate_iconspec(Material6, glyph=material6_names.list_status)  # noqa: E501
+ApplyThreshSetIcon = IconSpec.generate_iconspec(Codicons, glyph=codicons_names.checklist)  # noqa: E501

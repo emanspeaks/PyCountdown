@@ -24,8 +24,9 @@ from .clocklist import ClockListWidget
 
 
 class EpochWidget(QtWidgetWrapper[QFrame]):
-    def __init__(self, gui_parent: GuiWidgetParentType, label: str,
+    def __init__(self, gui_parent: GuiWidgetParentType, label: str = 'Epoch:',
                  timer: bool = False, keybd_shortcuts: bool = False,
+                 show_clocklist: bool = True,
                  *qtobj_args, **qtobj_kwargs):
         self.label = label
         self.timer = timer
@@ -33,6 +34,7 @@ class EpochWidget(QtWidgetWrapper[QFrame]):
         self.epoch_sec = 0
         self.input_fmt = TimeFormat.DHMS
         self.last_clock_id = None
+        self.show_clocklist = show_clocklist
         super().__init__(gui_parent, *qtobj_args, **qtobj_kwargs)
         self.create_widget()
 
@@ -73,10 +75,13 @@ class EpochWidget(QtWidgetWrapper[QFrame]):
         dhms_opt, ymdhms_opt, y_doy_hms_opt = self.create_input_format_radios()
         fold_known, is_fold = self.create_fold_options()
 
-        clocklist = ClockListWidget(self, True)
-        self.clocklist = clocklist
-
-        convert = self.create_convert_chk()
+        self.clocklist = None
+        self.convert = None
+        show_clocklist = self.show_clocklist
+        if show_clocklist:
+            clocklist = ClockListWidget(self, True)
+            self.clocklist = clocklist
+            convert = self.create_convert_chk()
 
         hbox_input_fmt = QHBoxLayout()
         hbox_input_fmt.addWidget(dhms_opt)
@@ -106,8 +111,12 @@ class EpochWidget(QtWidgetWrapper[QFrame]):
         hbox_epoch.addWidget(dhms.qtobj)
         hbox_epoch.addWidget(ymdhms.qtobj)
         hbox_epoch.addWidget(y_doy_hms.qtobj)
-        hbox_epoch.addWidget(clocklist.qtobj)
-        hbox_epoch.addWidget(convert)
+        if show_clocklist:
+            hbox_epoch.addWidget(clocklist.qtobj)
+            hbox_epoch.addWidget(convert)
+
+        self.hbox_epoch = hbox_epoch
+
         layout.addLayout(hbox_epoch)
 
         self.create_shortcuts()
@@ -263,8 +272,10 @@ class EpochWidget(QtWidgetWrapper[QFrame]):
         self.dhms_radio.setEnabled(checked)
         self.ymdhms_radio.setEnabled(checked)
         self.y_doy_hms_radio.setEnabled(checked)
-        self.clocklist.qtobj.setEnabled(checked)
-        self.convert.setEnabled(checked)
+        if self.show_clocklist:
+            self.clocklist.qtobj.setEnabled(checked)
+            self.convert.setEnabled(checked)
+
         self.fold_known.setEnabled(checked)
         self.is_fold.setEnabled(checked and self.fold_known.isChecked())
 
@@ -288,9 +299,14 @@ class EpochWidget(QtWidgetWrapper[QFrame]):
         parent.setTabOrder(self.y_doy_hms_radio, self.dhms.qtobj)
         parent.setTabOrder(self.dhms.qtobj, self.ymdhms.qtobj)
         parent.setTabOrder(self.ymdhms.qtobj, self.y_doy_hms.qtobj)
-        parent.setTabOrder(self.y_doy_hms.qtobj, self.clocklist.qtobj)
-        parent.setTabOrder(self.clocklist.qtobj, self.convert)
-        parent.setTabOrder(self.convert, self.fold_known)
+
+        show_clocklist = self.show_clocklist
+        nxt = self.clocklist.qtobj if show_clocklist else self.fold_known
+        parent.setTabOrder(self.y_doy_hms.qtobj, nxt)
+        if show_clocklist:
+            parent.setTabOrder(self.clocklist.qtobj, self.convert)
+            parent.setTabOrder(self.convert, self.fold_known)
+
         parent.setTabOrder(self.fold_known, self.is_fold)
         parent.setTabOrder(self.is_fold, nxt)
 
@@ -304,10 +320,13 @@ class EpochWidget(QtWidgetWrapper[QFrame]):
 
         self.epoch_sec = epoch_sec
         self.update_epoch_sec(None, epoch_sec)
+        clocklist = self.clocklist
         if data is None:
             self.dhms_radio.setChecked(True)
             self.dhms.qtobj.setVisible(True)
-            self.clocklist.qtobj.setCurrentIndex(0)
+            if clocklist:
+                clocklist.qtobj.setCurrentIndex(0)
+
             return
 
         fold_known_chk = self.fold_known
@@ -333,13 +352,13 @@ class EpochWidget(QtWidgetWrapper[QFrame]):
         self.y_doy_hms_radio.setChecked(is_y_doy_hms)
         self.y_doy_hms.qtobj.setVisible(is_y_doy_hms)
 
-        clocklist = self.clocklist
-        if self.timer:
-            clocklist.set_clock_id(NOW_ID)
-            clocklist.qtobj.setEnabled(False)
+        if clocklist:
+            if self.timer:
+                clocklist.set_clock_id(NOW_ID)
+                clocklist.qtobj.setEnabled(False)
 
-        else:
-            clocklist.set_clock(data.clock)
+            else:
+                clocklist.set_clock(data.clock)
 
     def update_epoch_sec(self, widget: BaseTimeEditorWidget, sec: float):
         # widget_name = widget.get_title() if widget else ""
@@ -364,12 +383,17 @@ class EpochWidget(QtWidgetWrapper[QFrame]):
 
         clklst = self.clocklist
         epoch_sec = self.epoch_sec
-        clkid = clklst.get_clock_id()
-        if clkid == NOW_ID:
-            clkid = 'TAI'
-            epoch_sec += now_tai_sec()
+        if clklst:
+            clkid = clklst.get_clock_id()
+            if clkid == NOW_ID:
+                clkid = 'TAI'
+                epoch_sec += now_tai_sec()
 
-        epoch_clock = DisplayClock.get_clock_for_id(clkid)
+            epoch_clock = DisplayClock.get_clock_for_id(clkid)
+
+        else:
+            epoch_clock = None
+
         return Epoch(epoch_clock, epoch_sec,
                      self.fold_known.isChecked(), self.is_fold.isChecked(),
                      self.input_fmt)

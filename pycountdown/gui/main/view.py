@@ -20,7 +20,7 @@ from ...lib.clocks.displayclocks import DisplayClock
 from ..gui_icons import (
     ConfigIcon, AddClockIcon, RemoveClockIcon, RefreshIcon, ClocksJsonIcon,
     SaveAsIcon, TimerIcon, OpenIcon, NewIcon, ShowHiddenIcon, ThresholdSetIcon,
-    UpArrowIcon, DownArrowIcon, CopyIcon,
+    UpArrowIcon, DownArrowIcon, CopyIcon, ApplyThreshSetIcon,
 )
 if TYPE_CHECKING:
     from .pres import MainWindow
@@ -130,6 +130,9 @@ class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
         toolbar.addAction(create_action(qtobj, "Threshold Sets",
                                         ThresholdSetIcon.icon(),
                                         pres.click_threshold_sets))
+        toolbar.addAction(create_action(qtobj, "Apply Threshold Set...",
+                                        ApplyThreshSetIcon.icon(),
+                                        pres.click_apply_tset))
 
         toolbar.addSeparator()
         toolbar.addAction(create_action(qtobj, "Refresh from file",
