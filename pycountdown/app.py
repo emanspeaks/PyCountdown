@@ -11,7 +11,11 @@ HERE = Path(__file__).parent
 
 
 CLOCKS_MTIME_KEY = '__clocks_mtime'
+CLOCKS_SCHEMA_KEY = '__clocks_schema'
+SCHEMA_KEY = 'json_schema'
 CLOCKS_FILE_CHECK_SEC_KEY = 'clocks_file_check_sec'
+SHOW_HIDDEN_KEY = 'show_hidden'
+LOCAL_SHOW_HIDDEN_KEY = f'local.{SHOW_HIDDEN_KEY}'
 
 
 class PyCountdownApp(PyRandyOSApp):
@@ -20,10 +24,15 @@ class PyCountdownApp(PyRandyOSApp):
     APP_ASSETS_DIR = HERE/"assets"
     APP_PATH_KEYS: tuple[str] = ('clocks_file', 'local.clocks_file')
     APP_GLOBAL_DEFAULTS = {
-        'clocks_file': './clocks.jsonc',
+        'clocks_file': 'clocks.jsonc',
         CLOCKS_MTIME_KEY: None,
         CLOCKS_FILE_CHECK_SEC_KEY: 5,
-        LOCAL_CONFIG_FILE_KEY: "~/.pycountdown_local_config.jsonc",
+        CLOCKS_SCHEMA_KEY: None,
+        LOCAL_CONFIG_FILE_KEY: "~/pycountdown/.pycountdown_local_config.jsonc",
+    }
+    APP_LOCAL_DEFAULTS = {
+        SCHEMA_KEY: "https://raw.githubusercontent.com/emanspeaks/PyCountdown/refs/heads/master/pycountdown/assets/clocks.schema.jsonc",  # noqa: E501
+        SHOW_HIDDEN_KEY: False,
     }
 
     @classmethod

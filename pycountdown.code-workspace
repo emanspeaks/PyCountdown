@@ -1,7 +1,12 @@
 {
   "folders": [
 		{
-			"path": "."
+			"path": ".",
+			"name": "root"
+		},
+		{
+			"path": "C:/Users/emanspeaks/pycountdown",
+			"name": "work"
 		}
 	],
   "settings": {
@@ -45,9 +50,9 @@
 				"console": "integratedTerminal",
 				"justMyCode": false,
 				"args": [
-					"${workspaceFolder}/.pycountdown_config.jsonc"
+					"${workspaceFolder:root}/.pycountdown_config.jsonc"
 				],
-				"cwd": "${workspaceFolder}"//,
+				"cwd": "${workspaceFolder:root}"//,
 				// "guiEventLoop": "qt"
 				// "stopOnEntry": true
 			},

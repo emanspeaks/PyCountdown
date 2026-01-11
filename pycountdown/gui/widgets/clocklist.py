@@ -20,7 +20,7 @@ class ClockListWidget(QtWidgetWrapper[QComboBox]):
         if self.show_now:
             qtobj.addItem("(now)", NOW_ID)
 
-        for name, clk_id in DisplayClock.get_dclock_name_id_full_list():
+        for name, clk_id in DisplayClock.get_valid_dclock_name_id_full_list():
             qtobj.addItem(name, clk_id)
 
         return qtobj

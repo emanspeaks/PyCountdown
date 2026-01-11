@@ -2,28 +2,24 @@ from typing import TYPE_CHECKING
 
 from pyrandyos.gui.widgets import GuiWindowLikeParentType
 from pyrandyos.gui.dialogs import GuiDialog
-from pyrandyos.gui.qt import QAbstractButton, QDialogButtonBox
+from pyrandyos.gui.qt import (
+    QAbstractButton, QDialogButtonBox
+)
 
 from ....logging import log_func_call
 from ....app import PyCountdownApp
 
-from .view import ClocksConfigDialogView
+from .view import ThreshSetEditorDialogView
 
 if TYPE_CHECKING:
     from ...main.pres import MainWindow
 
 
-class ClocksConfigDialog(GuiDialog[ClocksConfigDialogView]):
+class ThreshSetEditorDialog(GuiDialog[ThreshSetEditorDialogView]):
     @log_func_call
     def __init__(self, gui_parent: GuiWindowLikeParentType):
-        super().__init__("Clocks Configuration", gui_parent,
+        super().__init__('Edit Threshold Sets', gui_parent,
                          gui_parent.gui_view.qtobj)
-
-    @log_func_call
-    def load_clocks_file(self):
-        clocks_file = PyCountdownApp.get_clocks_file_path()
-        return (clocks_file.read_text() if clocks_file and clocks_file.exists()
-                else "")
 
     @log_func_call
     def dlgbtn_clicked(self, btn: QAbstractButton = None):
@@ -66,5 +62,5 @@ class ClocksConfigDialog(GuiDialog[ClocksConfigDialogView]):
 
     @log_func_call
     def create_gui_view(self, basetitle: str, *args,
-                        **kwargs) -> ClocksConfigDialogView:
-        return ClocksConfigDialogView(basetitle, self, *args, **kwargs)
+                        **kwargs) -> ThreshSetEditorDialogView:
+        return ThreshSetEditorDialogView(basetitle, self, *args, **kwargs)

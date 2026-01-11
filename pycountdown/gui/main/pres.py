@@ -1,19 +1,24 @@
 from pathlib import Path
 
-from pyrandyos.gui.qt import QTimer, Qt, QFileDialog
+from pyrandyos.gui.qt import QTimer, Qt, QFileDialog, QMessageBox
 from pyrandyos.gui.callback import qt_callback
 from pyrandyos.gui.window import GuiWindow
-from pyrandyos.gui.dialogs.config import ConfigTreeDialog
+# from pyrandyos.gui.dialogs.config import ConfigTreeDialog
 from pyrandyos.utils.time.now import now_tai_sec
 
 from ...version import __version__
 from ...logging import log_func_call, DEBUGLOW2, log_info, log_debuglow
-from ...app import PyCountdownApp, CLOCKS_FILE_CHECK_SEC_KEY
+from ...app import (
+    PyCountdownApp, CLOCKS_FILE_CHECK_SEC_KEY, LOCAL_SHOW_HIDDEN_KEY
+)
 # from ...lib.clocks import DEFAULT_CLOCKS, Clock
 from ...lib.clocks.displayclocks import DisplayClock
+# from ...lib.clocks.fmt import ClockFormatter
 
 from ..dialogs.clocks_config import ClocksConfigDialog
 from ..dialogs.clock_editor import ClockEditorDialog
+from ..dialogs.threshset_editor import ThreshSetEditorDialog
+from ..dialogs.config import ConfigTreeDialog
 
 from .view import MainWindowView
 
@@ -135,7 +140,7 @@ class MainWindow(GuiWindow[MainWindowView]):
         self.clock_tick()
 
     @log_func_call
-    def row_header_clicked(self, row: int):
+    def row_header_clicked(self, row: int, col: int):
         """
         Called when a row header is clicked. Copies the reconstructed
         original log line to the clipboard.
@@ -143,10 +148,12 @@ class MainWindow(GuiWindow[MainWindowView]):
         table = self.gui_view.clock_table
         # items = [table.item(row, col) for col in range(table.columnCount())]
         dclk = table.item(row, 1).data(UserRole)
-        idx = DisplayClock.get_idx_for_visible_idx(row)
-        log_info(f'Row {row} Index {idx} clicked')
+        # idx = DisplayClock.get_idx_for_visible_idx(row)
+        # log_info(f'Row {row + 1} Index {idx} clicked')
 
         dlg = ClockEditorDialog(self, dclk)
+        #                        dclk or DisplayClock(None, None, None,
+        #                                             ClockFormatter(None)))
         dlg.show()
 
     @log_func_call
@@ -164,7 +171,91 @@ class MainWindow(GuiWindow[MainWindowView]):
         self.update_table()
 
     @log_func_call
-    def remove_clock(self, idx: int = -1):
-        # DisplayClock.remove_from_pool(idx)
-        log_info(f"Removing clock at index {idx}")
+    def remove_clock(self, rows: int | list[int] = None):
+        view = self.gui_view
+        table = view.clock_table
+        if rows is None:
+            rows = list({item.row() for item in table.selectedItems()})
+
+        elif isinstance(rows, int):
+            rows = [rows]
+
+        r_dclks: list[tuple[int, DisplayClock]] = [
+            (r, table.item(r, 1).data(UserRole)) for r in rows
+        ]
+        if r_dclks:
+            msg = "Are you sure you want to remove the selected clock(s)?\n"
+            labels = [f"{r + 1}: {repr(dc.label) if dc.label else '(blank)'}"
+                      for r, dc in r_dclks]
+            msg += ", ".join(labels)
+            reply = QMessageBox.warning(view.qtobj, "Remove Clock", msg,
+                                        QMessageBox.Yes | QMessageBox.No)
+            if reply != QMessageBox.Yes:
+                return
+
+        for r, dc in r_dclks:
+            log_info(f"Removing clock {dc.label!r} at row index {r}")
+            DisplayClock.pool.remove(dc)
+
+        PyCountdownApp.export_clocks_file()
+        self.refresh_clocks_file(True)
+        return True
+
+    @log_func_call
+    def duplicate(self, rows: int | list[int] = None):
+        view = self.gui_view
+        table = view.clock_table
+        if rows is None:
+            rows = list({item.row() for item in table.selectedItems()})
+
+        elif isinstance(rows, int):
+            rows = [rows]
+
+        if not rows:
+            return
+        DisplayClock.duplicate_subpool([table.item(r, 1).data(UserRole)
+                                        for r in rows])
+        PyCountdownApp.export_clocks_file()
+        self.refresh_clocks_file(True)
+
+    @log_func_call
+    def toggle_show_hidden(self, checked: bool):
+        PyCountdownApp.set(LOCAL_SHOW_HIDDEN_KEY, checked)
         self.update_table()
+
+    @log_func_call
+    def click_threshold_sets(self):
+        dlg = ThreshSetEditorDialog(self)
+        dlg.show()
+
+    @log_func_call
+    def move_up(self, rows: int | list[int] = None):
+        view = self.gui_view
+        table = view.clock_table
+        if rows is None:
+            rows = list({item.row() for item in table.selectedItems()})
+
+        elif isinstance(rows, int):
+            rows = [rows]
+
+        if not rows:
+            return
+        DisplayClock.move_up([table.item(r, 1).data(UserRole) for r in rows])
+        PyCountdownApp.export_clocks_file()
+        self.refresh_clocks_file(True)
+
+    @log_func_call
+    def move_down(self, rows: int | list[int] = None):
+        view = self.gui_view
+        table = view.clock_table
+        if rows is None:
+            rows = list({item.row() for item in table.selectedItems()})
+
+        elif isinstance(rows, int):
+            rows = [rows]
+
+        if not rows:
+            return
+        DisplayClock.move_down([table.item(r, 1).data(UserRole) for r in rows])
+        PyCountdownApp.export_clocks_file()
+        self.refresh_clocks_file(True)

@@ -27,6 +27,10 @@ class Epoch:
         self.fold = fold
         self.input_fmt = input_fmt
 
+    def copy(self):
+        return Epoch(self.clock, self.epoch_sec, self.fold_known,
+                     self.fold, self.input_fmt)
+
     def __str__(self):
         return self.as_fmt_str(digits=3)
 

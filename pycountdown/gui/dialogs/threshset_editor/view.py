@@ -1,29 +1,29 @@
 from typing import TYPE_CHECKING
 
 from ....logging import log_func_call
-from ....app import PyCountdownApp
 from pyrandyos.gui.qt import (
     QVBoxLayout, QHBoxLayout, QDialogButtonBox, Qt, QKeySequence, QShortcut,
 )
 from pyrandyos.gui.dialogs import GuiDialogView
 from pyrandyos.gui.callback import qt_callback
-# from pyrandyos.gui.widgets.json_edit import JsonEditorWidget
 
-from ...widgets.json_edit import JsonEditorWidget
 if TYPE_CHECKING:
-    from .pres import ClocksConfigDialog
+    from .pres import ThreshSetEditorDialog
 
 
-class ClocksConfigDialogView(GuiDialogView['ClocksConfigDialog']):
+class ThreshSetEditorDialogView(GuiDialogView['ThreshSetEditorDialog']):
     @log_func_call
-    def __init__(self, basetitle: str, presenter: 'ClocksConfigDialog' = None,
+    def __init__(self, basetitle: str,
+                 presenter: 'ThreshSetEditorDialog' = None,
                  *qtobj_args, **qtobj_kwargs):
         GuiDialogView.__init__(self, basetitle, presenter, *qtobj_args,
                                **qtobj_kwargs)
         qtobj = self.qtobj
-        qtobj.resize(*PyCountdownApp.get_default_win_size())
+        # pres = self.gui_pres
+
+        qtobj.setFixedSize(400, 400)
         self.layout = QVBoxLayout(qtobj)
-        self.create_editor()
+        # self.create_editor()
         self.create_dialog_buttons()
         self.create_shortcuts()
 
@@ -53,14 +53,14 @@ class ClocksConfigDialogView(GuiDialogView['ClocksConfigDialog']):
         hbox.addWidget(dlgbuttons)
         self.dlgbuttons = dlgbuttons
 
-    @log_func_call
-    def create_editor(self):
-        # qtobj = self.qtobj
-        pres = self.gui_pres
-        layout = self.layout
+    # @log_func_call
+    # def create_editor(self):
+    #     # qtobj = self.qtobj
+    #     pres = self.gui_pres
+    #     layout = self.layout
 
-        editor = JsonEditorWidget(self)
-        layout.addWidget(editor.qtobj)
-        self.editor = editor
+    #     editor = JsonEditorWidget(self)
+    #     layout.addWidget(editor.qtobj)
+    #     self.editor = editor
 
-        editor.set_text(pres.load_clocks_file())
+    #     editor.set_text(pres.load_clocks_file())

@@ -56,6 +56,32 @@
         "clock": "US CT"
       },
       "rate": "TAI"
+    },
+    {
+      "label": "Sample label",
+      "id": "Sample label",
+      "display": {
+        "color": "#ffffff",
+        "digits": 0,
+        "hidden": false,
+        "thresh_set": null,
+        "time_format": "DHMS",
+        "zeropad": 0
+      },
+      "blank": true
+    },
+    {
+      "label": "",
+      "id": "",
+      "display": {
+        "color": "#ffffff",
+        "digits": 0,
+        "hidden": false,
+        "thresh_set": null,
+        "time_format": "DHMS",
+        "zeropad": 0
+      },
+      "blank": true
     }
   ]
 }

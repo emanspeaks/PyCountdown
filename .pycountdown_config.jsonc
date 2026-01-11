@@ -1,4 +1,5 @@
 {
+  "base_path": "~/pycountdown",
   "cli_log_level": "info",
   "file_log_level": "debug",
   // "file_log_level": "debuglow",
@@ -10,6 +11,7 @@
   // "show_traceback_locals": true,
   // "log_func_call_enabled": true,
   // "local.theme": "light",
-  "local.theme": "vibedark"//,
-  // "clocks_file": "./clocks.jsonc"
+  "local.theme": "vibedark",
+  // "clocks_file": "./clocks.jsonc",
+  "clocks_file_check_sec": 10
 }

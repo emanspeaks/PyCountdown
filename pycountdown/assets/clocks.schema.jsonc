@@ -93,11 +93,11 @@
         "type": "object",
         "properties": {
           "label": {
-            "type": "string",
+            "type": ["string", "null"],
             "description": "Name to display for the clock"
           },
           "id": {
-            "type": "string",
+            "type": ["string", "null"],
             "description": "ID to reference the clock"
           },
           "epoch": {
@@ -127,7 +127,7 @@
                 "description": "Minimum number of digits in the integral part of the value, and pad with this number of zeroes to ensure the minimum"
               },
               "thresholds": {
-                "type": "string",
+                "type": ["string", "null"],
                 "description": "Name of threshold set to use for text styling"
               },
               "color": {

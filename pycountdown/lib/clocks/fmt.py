@@ -30,11 +30,20 @@ class ClockFormatter(TimeFormatter):
         self.color = parse_color(color) or DEFAULT_COLOR
         self.thresh_set = thresh_set or None
 
+    def copy(self):
+        return ClockFormatter(self.hidden,
+                              self.time_format,
+                              self.digits,
+                              self.zeropad,
+                              self.color,
+                              self.thresh_set)
+
     def get_color(self, dclock: 'DisplayClock', tai: float):
         thresh_set = self.thresh_set
         default = self.color or DEFAULT_COLOR
-        if thresh_set:
-            t = dclock.clock.tai_to_clock_time(tai).epoch_sec
+        clock = dclock.clock
+        if clock and thresh_set:
+            t = clock.tai_to_clock_time(tai).epoch_sec
             color = ThresholdSet.pool[thresh_set].get_color_for_t(t)
             return color or default
         return default

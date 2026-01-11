@@ -4,6 +4,7 @@ args
 barfmt
 baselbl
 bool
+bottomidx
 brect
 cfgdict
 cfgpkgdir
@@ -15,6 +16,7 @@ clscache
 Consolas
 cpbase
 cpbasetxt
+currentidx
 db
 dbdir
 dbfile
@@ -122,6 +124,8 @@ qtwin
 qtwindow
 RBAR
 repr
+savecfgbtn
+savelocalbtn
 scroller
 SGMT
 shcore
@@ -149,6 +153,7 @@ tmpmodname
 tnew
 tock
 toolbtn
+topidx
 TPAD
 tparse
 tqdm

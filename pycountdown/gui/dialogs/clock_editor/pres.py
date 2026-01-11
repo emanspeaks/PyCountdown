@@ -13,7 +13,9 @@ from ....lib.clocks.clock import Clock, DEFAULT_CLOCKS
 from ....lib.clocks.fmt import ClockFormatter
 from ....lib.clocks.epoch import Epoch
 
-from .view import ClockEditorDialogView
+from .view import (
+    ClockEditorDialogView, TIMER_HEIGHT, CLOCK_HEIGHT, BLANK_HEIGHT,
+)
 
 if TYPE_CHECKING:
     from ...main.pres import MainWindow
@@ -34,17 +36,14 @@ class ClockEditorDialog(GuiDialog[ClockEditorDialogView]):
         self.timer = timer
         title = ("Edit Clock" if dclk
                  else ("New Timer" if timer else "New Clock"))
-        super().__init__(title, gui_parent)
+        super().__init__(title, gui_parent,
+                         gui_parent.gui_view.qtobj)
         self.set_values()
 
     def save_clock(self):
         self.get_values()
         if self.new:
             DisplayClock.pool.append(self.dclk)
-
-        # clocks_file = PyCountdownApp.get_clocks_file_path()
-        # if clocks_file and clocks_file.exists():
-        #     PyCountdownApp.export_clocks_file()
 
     @log_func_call
     def dlgbtn_clicked(self, btn: QAbstractButton = None):
@@ -63,6 +62,36 @@ class ClockEditorDialog(GuiDialog[ClockEditorDialogView]):
 
         if btn is buttons.button(QDialogButtonBox.Ok):
             self.gui_view.qtobj.accept()
+
+    @log_func_call
+    def click_delete(self):
+        mw: 'MainWindow' = self.gui_parent
+        idx = DisplayClock.pool.index(self.dclk)
+        if mw.remove_clock(DisplayClock.get_visible_idx_for_idx(idx)):
+            self.gui_view.qtobj.reject()
+
+    def toggle_blank(self, state: bool | Qt.CheckState):
+        view = self.gui_view
+        is_blank = state is True or state == Qt.Checked
+        is_not_blank = not is_blank
+        view.epoch.qtobj.setVisible(is_not_blank)
+        ref = view.ref
+        if ref:
+            ref.qtobj.setVisible(is_not_blank)
+
+        follow_chk = view.follow_chk
+        if follow_chk:
+            follow_chk.setVisible(is_not_blank)
+            view.follow.qtobj.setVisible(is_not_blank)
+
+        rate_chk = view.rate_chk
+        if rate_chk:
+            rate_chk.setVisible(is_not_blank)
+            view.rate.qtobj.setVisible(is_not_blank)
+
+        view.qtobj.setFixedHeight((TIMER_HEIGHT if self.timer
+                                   else CLOCK_HEIGHT) if is_not_blank
+                                  else BLANK_HEIGHT)
 
     @log_func_call
     def show(self):
@@ -103,10 +132,16 @@ class ClockEditorDialog(GuiDialog[ClockEditorDialogView]):
         clk_id.setEnabled(clk_id_chk.isChecked())
 
         clock = dclk.clock
-        clk_epoch = clock.epoch
-        clk_ref = clock.ref
-        clk_follow = clock.follow
-        clk_rate = clock.rate
+
+        blank_chk = view.blank_chk
+        if blank_chk:
+            blank_chk.setChecked(clock is None)
+            self.toggle_blank(blank_chk.isChecked())
+
+        clk_epoch = clock.epoch if clock else None
+        clk_ref = clock.ref if clock else None
+        clk_follow = clock.follow if clock else None
+        clk_rate = clock.rate if clock else None
 
         view.epoch.set_values(clk_epoch)
         ref = view.ref
@@ -128,14 +163,19 @@ class ClockEditorDialog(GuiDialog[ClockEditorDialogView]):
             view.rate.qtobj.setEnabled(rate_chk.isChecked())
             rate.set_rate(clk_rate if clk_rate else BaseClockRate.TAI)
 
-        # formatter = dclk.formatter
-        # fmt_color = formatter.color
-        # fmt_digits = formatter.digits
-        # fmt_hidden = formatter.hidden
-        # fmt_tset = formatter.thresh_set
-        # fmt_fmt = formatter.time_format
-        # fmt_zeropad = formatter.zeropad
+        formatter = dclk.formatter
+        view.digits.setValue(formatter.digits)
+        view.hidden_chk.setChecked(formatter.hidden)
+        view.display_fmt.set_time_format(formatter.time_format)
+        view.zeropad.setValue(formatter.zeropad)
+        view.color_btn.set_color(formatter.color)
 
+        threshset = view.threshset
+        fmt_threshset = formatter.thresh_set
+        threshset.set_threshset(fmt_threshset)
+        self.toggle_threshsets(fmt_threshset is not None)
+
+    @log_func_call
     def get_values(self):
         view = self.gui_view
         dclk = self.dclk
@@ -146,27 +186,45 @@ class ClockEditorDialog(GuiDialog[ClockEditorDialogView]):
         clk_id_chk = view.clk_id_chk
         dclk.clk_id = view.clk_id.text() if clk_id_chk.isChecked() else label
 
-        dclk_clock = dclk.clock
-        dclk_clock.epoch = view.epoch.get_epoch()
-        dclk_clock.ref = view.ref.get_epoch() if view.ref else None
+        blank_chk = view.blank_chk
+        is_blank = blank_chk.isChecked() if blank_chk else False
 
-        follow_chk = view.follow_chk
-        do_follow = follow_chk.isChecked() if follow_chk else False
-        follow = view.follow.get_clock() if do_follow else None
-        dclk_clock.follow = follow
+        if is_blank:
+            dclk.clock = None
 
-        rate_chk = view.rate_chk
-        do_rate = rate_chk.isChecked() if rate_chk else False
-        rate = view.rate.get_rate() if do_rate else None
-        if not rate:
-            rate = follow.rate if follow else BaseClockRate.TAI
+        else:
+            dclk_clock = dclk.clock
+            dclk_clock.epoch = view.epoch.get_epoch()
+            dclk_clock.ref = view.ref.get_epoch() if view.ref else None
 
-        dclk_clock.rate = rate
+            follow_chk = view.follow_chk
+            do_follow = follow_chk.isChecked() if follow_chk else False
+            follow = view.follow.get_clock() if do_follow else None
+            dclk_clock.follow = follow
 
-        # dclk_fmt = dclk.formatter
-        # dclk_fmt.color = None
-        # dclk_fmt.digits = None
-        # dclk_fmt.hidden = None
-        # dclk_fmt.thresh_set = None
-        # dclk_fmt.time_format = None
-        # dclk_fmt.zeropad = None
+            rate_chk = view.rate_chk
+            do_rate = rate_chk.isChecked() if rate_chk else False
+            rate = view.rate.get_rate() if do_rate else None
+            if not rate:
+                rate = follow.rate if follow else BaseClockRate.TAI
+
+            dclk_clock.rate = rate
+
+        dclk_fmt = dclk.formatter
+        dclk_fmt.color = view.color_btn.get_color()
+        dclk_fmt.digits = view.digits.value()
+        dclk_fmt.hidden = view.hidden_chk.isChecked()
+        dclk_fmt.time_format = view.display_fmt.get_time_format()
+        dclk_fmt.zeropad = view.zeropad.value()
+
+        threshset = (view.threshset.get_threshset_name()
+                     if view.threshset_chk.isChecked() else None)
+        dclk_fmt.thresh_set = threshset
+
+    def toggle_threshsets(self, state: bool | Qt.CheckState):
+        view = self.gui_view
+        checked = state is True or state == Qt.Checked
+        view.threshset_chk.setChecked(checked)
+        view.threshset.qtobj.setEnabled(checked)
+        # view.color_btn.qtobj.setEnabled(not checked)
+        view.color_btn.qtobj.setVisible(not checked)

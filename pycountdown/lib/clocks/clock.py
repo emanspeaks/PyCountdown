@@ -24,6 +24,13 @@ class Clock:
         self.follow = follow
         self.rate = rate
 
+    def copy(self):
+        epoch = self.epoch
+        ref = self.ref
+        return Clock(epoch.copy() if epoch else None,
+                     ref.copy() if ref else None,
+                     self.follow, self.rate, self._offset_sec, self._abs)
+
     def is_abs(self):
         follow = self.follow
         return (
