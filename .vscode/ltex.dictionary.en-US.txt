@@ -4,15 +4,19 @@ args
 barfmt
 baselbl
 bool
+bottomidx
 brect
 cfgdict
 cfgpkgdir
 chgrp
 clippy
+clkid
+clklst
 clscache
 Consolas
 cpbase
 cpbasetxt
+currentidx
 db
 dbdir
 dbfile
@@ -24,6 +28,8 @@ dclock
 debugfmtstr
 DHMS
 dleap
+dlen
+dlgbtn
 dlgbuttons
 dlgview
 dllerrs
@@ -58,6 +64,7 @@ jdumps
 jloads
 klass
 lastc
+lastf
 levelno
 loadf
 logcfg
@@ -80,6 +87,7 @@ noink
 noinks
 nrows
 octoface
+oldtset
 outf
 Pizetta
 ppath
@@ -117,6 +125,8 @@ qtwin
 qtwindow
 RBAR
 repr
+savecfgbtn
+savelocalbtn
 scroller
 SGMT
 shcore
@@ -134,6 +144,7 @@ sstr
 STARTBRAK
 stmp
 str
+tcheck
 Teph
 tgtdir
 tkbasewidget
@@ -143,9 +154,12 @@ tmpmodname
 tnew
 tock
 toolbtn
+topidx
 TPAD
 tparse
 tqdm
+tset
+tsetlist
 ttffile
 TTRANS
 txtbox
@@ -164,6 +178,7 @@ venv
 vflip
 vheader
 vint
+vlayout
 vline
 VPAD
 VSCode

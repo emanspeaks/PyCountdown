@@ -28,6 +28,9 @@ classifiers = [
 qdarkstyle = [
   "qdarkstyle",
 ]
+dev = [
+  "types-pyside2",
+]
 
 [tool.hatch.version]
 # path = "pycountdown/_version.py"

@@ -24,6 +24,13 @@ class Clock:
         self.follow = follow
         self.rate = rate
 
+    def copy(self):
+        epoch = self.epoch
+        ref = self.ref
+        return Clock(epoch.copy() if epoch else None,
+                     ref.copy() if ref else None,
+                     self.follow, self.rate, self._offset_sec, self._abs)
+
     def is_abs(self):
         follow = self.follow
         return (
@@ -89,8 +96,8 @@ def create_default_clocks():
     us_mt = Clock(None, rate=BaseClockRate.US_MT)
     us_pt = Clock(None, rate=BaseClockRate.US_PT)
 
-    unix = Clock(utc, UNIX_UTC_SEC, rate=BaseClockRate.UNIX)
-    gpst = Clock(tai, GPST_EPOCH_TAI)
+    unix = Clock(Epoch(utc, UNIX_UTC_SEC), rate=BaseClockRate.UNIX)
+    gpst = Clock(Epoch(tai, GPST_EPOCH_TAI))
 
     return {
         'UTC': utc,

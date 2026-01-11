@@ -16,21 +16,28 @@ if TYPE_CHECKING:
 class ClocksConfigDialog(GuiDialog[ClocksConfigDialogView]):
     @log_func_call
     def __init__(self, gui_parent: GuiWindowLikeParentType):
-        super().__init__("Clocks Configuration", gui_parent)
+        super().__init__("Clocks Configuration", gui_parent,
+                         gui_parent.gui_view.qtobj)
 
     @log_func_call
     def load_clocks_file(self):
         clocks_file = PyCountdownApp.get_clocks_file_path()
-        return clocks_file.read_text()
+        return (clocks_file.read_text() if clocks_file and clocks_file.exists()
+                else "")
 
     @log_func_call
-    def save_clicked(self, btn: QAbstractButton = None):
+    def dlgbtn_clicked(self, btn: QAbstractButton = None):
         dlgview = self.gui_view
         buttons = dlgview.dlgbuttons
+        if btn is buttons.button(QDialogButtonBox.Cancel):
+            self.gui_view.qtobj.reject()
+            return
 
-        self.save_clocks_file()
+        if self.save_clocks_file() is None:
+            return
         mw: 'MainWindow' = self.gui_parent
         mw.refresh_clocks_file(True)
+
         if btn is buttons.button(QDialogButtonBox.Ok):
             self.gui_view.qtobj.accept()
 
@@ -39,8 +46,14 @@ class ClocksConfigDialog(GuiDialog[ClocksConfigDialogView]):
         dlgview = self.gui_view
         editor = dlgview.editor
         txt = editor.get_text()
+
+        mw: 'MainWindow' = self.gui_parent
+        if not mw.set_save_path_if_unset():
+            return None
         clocks_file = PyCountdownApp.get_clocks_file_path()
-        return clocks_file.write_text(txt)
+        if clocks_file:
+            return clocks_file.write_text(txt)
+        return None
 
     @log_func_call
     def show(self):

@@ -1,20 +1,87 @@
 {
   "$schema": "https://raw.githubusercontent.com/emanspeaks/PyCountdown/refs/heads/master/pycountdown/assets/clocks.schema.jsonc",
+  "threshold_sets": {},
   "clocks": [
     {
       "label": "UTC",
-      "follow": "UTC"
+      "id": "UTC",
+      "display": {
+        "color": "#ffffff",
+        "digits": 0,
+        "hidden": false,
+        "thresh_set": null,
+        "time_format": "YMDHMS",
+        "zeropad": 0
+      },
+      "follow": "UTC",
+      "rate": "UTC"
     },
     {
       "label": "Central",
-      "follow": "US CT"
+      "id": "Central",
+      "display": {
+        "color": "#ffffff",
+        "digits": 0,
+        "hidden": false,
+        "thresh_set": null,
+        "time_format": "YMDHMS",
+        "zeropad": 0
+      },
+      "follow": "US CT",
+      "rate": "US_CT"
     },
     {
-      "label": "Christmas",
+      "label": "testing",
+      "id": "testing",
+      "display": {
+        "color": "#ffffff",
+        "digits": 0,
+        "hidden": false,
+        "thresh_set": null,
+        "time_format": "DHMS",
+        "zeropad": 0
+      },
       "epoch": {
-        "clock": "US CT",
-        "t": [2025, 12, 25, 0, 0, 0]
-      }
+        "t": [
+          2026,
+          7,
+          28,
+          0,
+          0,
+          0.0
+        ],
+        "format": "YMDHMS",
+        "fold_known": false,
+        "fold": false,
+        "clock": "US CT"
+      },
+      "rate": "TAI"
+    },
+    {
+      "label": "Sample label",
+      "id": "Sample label",
+      "display": {
+        "color": "#ffffff",
+        "digits": 0,
+        "hidden": false,
+        "thresh_set": null,
+        "time_format": "DHMS",
+        "zeropad": 0
+      },
+      "blank": true
+    },
+    {
+      "label": "",
+      "id": "",
+      "display": {
+        "color": "#ffffff",
+        "digits": 0,
+        "hidden": false,
+        "thresh_set": null,
+        "time_format": "DHMS",
+        "zeropad": 0
+      },
+      "blank": true
     }
   ]
 }
