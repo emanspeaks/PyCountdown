@@ -191,3 +191,14 @@ ymdhms
 YMDHMSKEYS
 ymdhmsms
 ystr
+PyRandyOS
+eph
+Barycentric
+DOY
+JSONC
+ephemerides
+overtype
+PgUp
+PgDn
+overtyped
+TDB

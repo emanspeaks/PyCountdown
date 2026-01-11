@@ -84,9 +84,42 @@ class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
     def create_shortcuts(self):
         qtobj = self.qtobj
         pres = self.gui_pres
+
         dup_shortcut = QShortcut(QKeySequence(Qt.CTRL + Qt.Key_D), qtobj)
         dup_shortcut.activated.connect(qt_callback(pres.duplicate))
         self.dup_shortcut = dup_shortcut
+
+        add_shortcut = QShortcut(QKeySequence(Qt.CTRL + Qt.Key_T), qtobj)
+        add_shortcut.activated.connect(qt_callback(pres.add_clock))
+        self.add_shortcut = add_shortcut
+
+        delete_shortcut = QShortcut(QKeySequence(Qt.Key_Delete), qtobj)
+        delete_shortcut.activated.connect(qt_callback(pres.remove_clock))
+        self.delete_shortcut = delete_shortcut
+
+        copy_shortcut = QShortcut(QKeySequence(Qt.CTRL + Qt.Key_C), qtobj)
+        copy_shortcut.activated.connect(qt_callback(pres.copy_clock))
+        self.copy_shortcut = copy_shortcut
+
+        move_up_shortcut = QShortcut(QKeySequence(Qt.CTRL + Qt.Key_Up), qtobj)
+        move_up_shortcut.activated.connect(qt_callback(pres.move_up))
+        self.move_up_shortcut = move_up_shortcut
+
+        move_down_shortcut = QShortcut(QKeySequence(Qt.CTRL + Qt.Key_Down), qtobj)  # noqa: E501
+        move_down_shortcut.activated.connect(qt_callback(pres.move_down))
+        self.move_down_shortcut = move_down_shortcut
+
+        timer_shortcut = QShortcut(QKeySequence(Qt.CTRL + Qt.Key_R), qtobj)
+        timer_shortcut.activated.connect(qt_callback(pres.add_timer))
+        self.timer_shortcut = timer_shortcut
+
+        edit_shortcut = QShortcut(QKeySequence(Qt.Key_Return), qtobj)
+        edit_shortcut.activated.connect(qt_callback(pres.edit_selected_clock))
+        self.edit_shortcut = edit_shortcut
+
+        edit_shortcut2 = QShortcut(QKeySequence(Qt.Key_Enter), qtobj)
+        edit_shortcut2.activated.connect(qt_callback(pres.edit_selected_clock))
+        self.edit_shortcut2 = edit_shortcut2
 
     @load_status_step("Creating toolbars")
     @log_func_call
@@ -104,22 +137,28 @@ class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
 
         toolbar.addAction(create_action(qtobj, "Add clock",
                                         AddClockIcon.icon(),
-                                        pres.add_clock))
+                                        pres.add_clock,
+                                        tooltip="Add clock (Ctrl+T)"))
         toolbar.addAction(create_action(qtobj, "Remove clock",
                                         RemoveClockIcon.icon(),
-                                        pres.remove_clock))
+                                        pres.remove_clock,
+                                        tooltip="Remove clock (Delete)"))
         toolbar.addAction(create_action(qtobj, "Add timer",
                                         TimerIcon.icon(),
-                                        pres.add_timer))
+                                        pres.add_timer,
+                                        tooltip="Add timer (Ctrl+R)"))
         toolbar.addAction(create_action(qtobj, "Move up",
                                         UpArrowIcon.icon(),
-                                        pres.move_up))
+                                        pres.move_up,
+                                        tooltip="Move up (Ctrl+Up)"))
         toolbar.addAction(create_action(qtobj, "Move down",
                                         DownArrowIcon.icon(),
-                                        pres.move_down))
+                                        pres.move_down,
+                                        tooltip="Move down (Ctrl+Down)"))
         toolbar.addAction(create_action(qtobj, "Duplicate",
                                         CopyIcon.icon(),
-                                        pres.duplicate))
+                                        pres.duplicate,
+                                        tooltip="Duplicate (Ctrl+D)"))
 
         toolbar.addSeparator()
         show_hidden_action = create_action(qtobj, "Show hidden clocks",
