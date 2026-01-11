@@ -8,20 +8,92 @@ A comprehensive guide to using PyCountdown, a powerful countdown clock applicati
 
 1. [Introduction](#introduction)
 2. [Installation](#installation)
+   - [Requirements](#requirements)
+   - [Installing from PyPI](#installing-from-pypi)
+   - [Installing from Source](#installing-from-source)
+   - [Optional Dependencies](#optional-dependencies)
 3. [Getting Started](#getting-started)
+   - [Launching PyCountdown](#launching-pycountdown)
+   - [First Steps](#first-steps)
 4. [Main Interface](#main-interface)
+   - [Toolbar](#toolbar)
+   - [Clock Table](#clock-table)
+     - [Selecting Clocks](#selecting-clocks)
+     - [Editing Clocks](#editing-clocks)
 5. [Working with Clocks](#working-with-clocks)
-6. [Clock Editor](#clock-editor)
-7. [Timers](#timers)
-8. [Threshold Sets](#threshold-sets)
-9. [Configuration Files](#configuration-files)
-10. [Time Formats](#time-formats)
-11. [Time Rates](#time-rates)
-12. [Program Configuration](#program-configuration)
-13. [Keyboard Shortcuts](#keyboard-shortcuts)
-14. [Clocks File Format (JSON Schema)](#clocks-file-format-json-schema)
-15. [Advanced Topics](#advanced-topics)
-16. [Troubleshooting](#troubleshooting)
+   - [Understanding Clock Types](#understanding-clock-types)
+   - [Built-in Default Clocks](#built-in-default-clocks)
+   - [Creating a New Clock](#creating-a-new-clock)
+   - [Editing an Existing Clock](#editing-an-existing-clock)
+   - [Removing Clocks](#removing-clocks)
+   - [Reordering Clocks](#reordering-clocks)
+   - [Duplicating Clocks](#duplicating-clocks)
+6. [Epoch Widget](#epoch-widget)
+   - [Input format](#input-format)
+   - [Time fields](#time-fields)
+     - [Value entry](#value-entry)
+     - [Keyboard entry and navigation](#keyboard-entry-and-navigation)
+     - [Increment/decrement](#incrementdecrement)
+     - [DHMS Days](#dhms-days)
+   - [Epoch reference clock](#epoch-reference-clock)
+     - [Convert](#convert)
+     - [(now) clock](#now-clock)
+   - [Folds](#folds)
+7. [Clock Editor](#clock-editor)
+   - [Label and ID](#label-and-id)
+   - [Epoch Settings](#epoch-settings)
+   - [Real-time Reference](#real-time-reference)
+   - [Follow Clock](#follow-clock)
+   - [Tick Rate](#tick-rate)
+   - [Display Options](#display-options)
+     - [Hidden](#hidden)
+     - [Decimal Digits](#decimal-digits)
+     - [Zero-padded Width](#zero-padded-width)
+     - [Display Format](#display-format)
+     - [Threshold Set](#threshold-set)
+     - [Default Color](#default-color)
+8. [Timers](#timers)
+   - [Creating a Timer](#creating-a-timer)
+   - [Timer vs Clock](#timer-vs-clock)
+   - [Timer Value](#timer-value)
+9. [Threshold Sets](#threshold-sets)
+   - [Understanding Thresholds](#understanding-thresholds)
+   - [Creating and Managing Threshold Sets](#creating-and-managing-threshold-sets)
+   - [Threshold Set Example](#threshold-set-example)
+   - [Applying Threshold Sets](#applying-threshold-sets)
+10. [Clocks Files](#clocks-files)
+    - [Default File Location](#default-file-location)
+    - [File Operations](#file-operations)
+    - [Auto-reload](#auto-reload)
+    - [Clocks JSON Editor](#clocks-json-editor)
+    - [Time Formats](#time-formats)
+      - [Available Formats](#available-formats)
+      - [DHMS Format Details](#dhms-format-details)
+    - [Tick Rates](#tick-rates)
+      - [Rate Inheritance](#rate-inheritance)
+11. [Program Configuration](#program-configuration)
+    - [Configuration Viewer](#configuration-viewer)
+    - [Key Settings](#key-settings)
+    - [Saving Configuration](#saving-configuration)
+12. [Keyboard Shortcuts](#keyboard-shortcuts)
+13. [Clocks File Format (JSON Schema)](#clocks-file-format-json-schema)
+    - [Clock Object Properties](#clock-object-properties)
+    - [Epoch Object Properties](#epoch-object-properties)
+    - [Display Object Properties](#display-object-properties)
+14. [Advanced Topics](#advanced-topics)
+    - [Clock Relationships](#clock-relationships)
+    - [Example: Mission Timer](#example-mission-timer)
+    - [Example: Countdown with Multiple Checkpoints](#example-countdown-with-multiple-checkpoints)
+    - [Window Always-on-Top](#window-always-on-top)
+15. [Troubleshooting](#troubleshooting)
+    - [Using the Log History](#using-the-log-history)
+    - [Clock Not Updating](#clock-not-updating)
+    - [Colors Not Changing](#colors-not-changing)
+    - [File Not Loading](#file-not-loading)
+    - [Clock Shows Wrong Time](#clock-shows-wrong-time)
+    - [Application Won't Start](#application-wont-start)
+    - [Common Log Messages](#common-log-messages)
+16. [Support](#support)
 
 ---
 
@@ -299,6 +371,8 @@ A *time fold* is when a particular numerical time can be repeated in a timescale
 
 Note that UTC does not "fold" during leap seconds, but Unix time does.  The time used internally by PyCountdown depends on the underlying system implementation of the Python standard library `time.time()`, which typically reports the system clock as a Unix timestamp, and therefore may be susceptible to errors during a leap second.  PyCountdown and the system clock should correct themselves following the leap second, but the time during the leap second may be in error.  It is unlikely that PyCountdown will ever be used for critical operations spanning a leap second, especially since the timekeeping community is moving towards recommending ending the practice of leap seconds, but this is still undecided as of the time of this writing. This software has no warranty per its MIT License, so exercise caution should PyCountdown be used in environments where this matters.
 
+---
+
 ## Clock Editor
 
 The clock editor dialog allows complete control over clock properties.
@@ -313,7 +387,7 @@ The clock editor dialog allows complete control over clock properties.
 
 ### Epoch Settings
 
-The epoch of the clock defines the "zero" reference time for the clock to be created.  It is always defined with respect to another clock, either an absolute timescale or another clock defined in the same PyCountdown Clocks file.  See the Epoch Widget section for details on entering or editing epochs.
+The epoch of the clock defines the "zero" reference time for the clock to be created.  It is always defined with respect to another clock, either an absolute timescale or another clock defined in the same PyCountdown Clocks file.  See the [Epoch Widget](#epoch-widget) section for details on entering or editing epochs.
 
 ### Real-time Reference
 
@@ -513,13 +587,11 @@ For direct access to the JSON configuration within PyCountdown:
 2. Edit the raw JSON data
 3. Save changes
 
----
-
 ### Time Formats
 
 PyCountdown supports multiple time formats for JSON input and display.
 
-### Available Formats
+#### Available Formats
 
 | Format | Input Example | Notes |
 | -------- | --------------- | ----------------- |
@@ -532,7 +604,7 @@ PyCountdown supports multiple time formats for JSON input and display.
 | **Y_DOY_HMS** | `[2025, 1, 12, 30, 45]` | while also a list of five numbers, this is not implicitly assumed and user mus specify input format in the JSON |
 | **YMDHMS** | `[2025, 1, 1, 12, 30, 45]` | list of six values is always assumed YMDHMS |
 
-#### DHMS Format Details
+##### DHMS Format Details
 
 DHMS can be specified as:
 
@@ -540,11 +612,9 @@ DHMS can be specified as:
 - 5-element array: `[days, hours, minutes, seconds, sign]` where sign is -1 or 1
 - String with slash: `"1/12:30:45"` or `"-1\12:30:45"`
 
----
-
 ### Tick Rates
 
-Tick rates define how a clock's time relates to how it numerically progresses.  See the section on Tick Rates in the Epoch Widget section.
+Tick rates define how a clock's time relates to how it numerically progresses.  See the [Tick Rate](#tick-rate) section in [Clock Editor](#clock-editor).
 
 #### Rate Inheritance
 
