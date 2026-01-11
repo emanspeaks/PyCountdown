@@ -1,6 +1,10 @@
 # PyCountdown
 
-Countdown clocks
+MCC-style countdown clocks
+
+## Documentation
+
+See the [User Manual](docs/USER_MANUAL.md) for comprehensive usage instructions.
 
 ## Develop
 
