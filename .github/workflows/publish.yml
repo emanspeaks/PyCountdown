@@ -1,23 +1,107 @@
 name: Build and Publish Python Package Wheels
 on:
   push:
-    tags:
-      - 'v*'
     branches:
-      - develop
-  pull_request:
-    branches:
-      - main
-  release:
-    types: [published]
+      - master
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  create-tag:
+    name: Create Semantic Version Tag
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required to create tags
+    outputs:
+      new_tag: ${{ steps.create_tag.outputs.new_tag }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # Important: gets full git history for versioning
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get latest tag and determine next version
+        id: create_tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Fetch all tags
+          git fetch --tags
+          
+          # Get the latest tag (sorted by version)
+          LATEST_TAG=$(git tag -l "v*" | sort -V | tail -n 1)
+          
+          # If no tags exist, start with v0.0.0
+          if [ -z "$LATEST_TAG" ]; then
+            LATEST_TAG="v0.0.0"
+            echo "No existing tags found. Starting with $LATEST_TAG"
+          else
+            echo "Latest tag: $LATEST_TAG"
+          fi
+          
+          # Extract version components (remove 'v' prefix)
+          VERSION=${LATEST_TAG#v}
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+          
+          # Determine version bump type based on PR labels
+          # Get the PR number from the merge commit
+          PR_NUMBER=$(gh pr list --state merged --json number,mergeCommit --jq ".[] | select(.mergeCommit.oid == \"${{ github.sha }}\") | .number" | head -n 1)
+          
+          BUMP_TYPE="patch"  # Default to patch
+          
+          if [ -n "$PR_NUMBER" ]; then
+            echo "Merge commit from PR #$PR_NUMBER"
+            # Check for labels
+            LABELS=$(gh pr view "$PR_NUMBER" --json labels --jq '.labels[].name')
+            echo "PR Labels: $LABELS"
+            
+            if echo "$LABELS" | grep -q "release:major"; then
+              BUMP_TYPE="major"
+            elif echo "$LABELS" | grep -q "release:minor"; then
+              BUMP_TYPE="minor"
+            fi
+          else
+            echo "No PR found for this merge commit, defaulting to patch bump"
+          fi
+          
+          echo "Bump type: $BUMP_TYPE"
+          
+          # Calculate new version
+          if [ "$BUMP_TYPE" = "major" ]; then
+            MAJOR=$((MAJOR + 1))
+            MINOR=0
+            PATCH=0
+          elif [ "$BUMP_TYPE" = "minor" ]; then
+            MINOR=$((MINOR + 1))
+            PATCH=0
+          else
+            PATCH=$((PATCH + 1))
+          fi
+          
+          NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
+          echo "New tag: $NEW_TAG"
+          
+          # Check if tag already exists
+          if git rev-parse "$NEW_TAG" >/dev/null 2>&1; then
+            echo "Error: Tag $NEW_TAG already exists!"
+            exit 1
+          fi
+          
+          # Create and push the new tag
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$NEW_TAG" -m "Release $NEW_TAG"
+          git push origin "$NEW_TAG"
+          
+          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+          echo "Successfully created and pushed tag: $NEW_TAG"
+
   build-pypi:
     name: Build PyPI distribution
+    needs:
+      - create-tag
     runs-on: ubuntu-latest
     # permissions:
     #   contents: write  # Required to push back to repo
@@ -45,13 +129,45 @@ jobs:
           name: python-package-distributions
           path: dist/
 
+  # Job to create a GitHub Release for the new tag
+  create-release:
+    name: Create GitHub Release
+    needs:
+      - create-tag
+      - build-pypi
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required to create releases
+    steps:
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          NEW_TAG="${{ needs.create-tag.outputs.new_tag }}"
+          
+          # Check if release already exists
+          if gh release view "$NEW_TAG" >/dev/null 2>&1; then
+            echo "Release $NEW_TAG already exists, skipping creation"
+            exit 0
+          fi
+          
+          # Create the release
+          gh release create "$NEW_TAG" \
+            --title "Release $NEW_TAG" \
+            --notes "Automated release for $NEW_TAG" \
+            --target master
+          
+          echo "Successfully created release: $NEW_TAG"
+
   # Job to upload built distributions as GitHub Release assets
-  # Only runs when the workflow is triggered by a GitHub release event
+  # Runs after the release is created
   upload-release-assets:
     name: Upload distributions to GitHub Release
-    if: github.event_name == 'release' && github.event.action == 'published'
     needs:
+      - create-tag
       - build-pypi
+      - create-release
     runs-on: ubuntu-latest
     permissions:
       contents: write  # Required to upload release assets
@@ -66,6 +182,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
+          NEW_TAG="${{ needs.create-tag.outputs.new_tag }}"
+          
           # Verify files exist before uploading
           shopt -s nullglob
           files=(dist/*.whl dist/*.tar.gz)
@@ -73,8 +191,10 @@ jobs:
             echo "Error: No distribution files found in dist/"
             exit 1
           fi
+          
+          echo "Uploading ${#files[@]} file(s) to release $NEW_TAG"
           # Upload all wheels and source distributions to the release
-          gh release upload ${{ github.event.release.tag_name }} "${files[@]}" --clobber
+          gh release upload "$NEW_TAG" "${files[@]}" --clobber
 
   #test-pypi-publish:
     #name: Publish to Test PyPI
