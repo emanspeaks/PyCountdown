@@ -67,13 +67,14 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           # Verify files exist before uploading
-          if ls dist/*.whl dist/*.tar.gz 1> /dev/null 2>&1; then
-            # Upload all wheels and source distributions to the release
-            gh release upload ${{ github.event.release.tag_name }} dist/*.whl dist/*.tar.gz --clobber
-          else
+          shopt -s nullglob
+          files=(dist/*.whl dist/*.tar.gz)
+          if [ ${#files[@]} -eq 0 ]; then
             echo "Error: No distribution files found in dist/"
             exit 1
           fi
+          # Upload all wheels and source distributions to the release
+          gh release upload ${{ github.event.release.tag_name }} "${files[@]}" --clobber
 
   #test-pypi-publish:
     #name: Publish to Test PyPI
