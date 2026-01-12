@@ -171,7 +171,7 @@ jobs:
           gh release create "$NEW_TAG" \
             --title "Release $NEW_TAG" \
             --generate-notes \
-            --target master
+            --target "${{ github.ref_name }}"
           
           echo "Successfully created release: $NEW_TAG"
 
