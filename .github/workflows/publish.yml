@@ -1,36 +1,35 @@
-# Workflow configuration for publishing Python packages to PyPI
+name: Publish Docker Image
 
-# Workflow triggers
-ame: Publish to PyPI
 on:
   push:
     tags:
       - "v*"
 
-defaults:
-  run:
-    shell: bash
-
-# Workflow jobs
 jobs:
-  upload-release-assets:
+  publish:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      # Verify files exist in dist/ directory
-      - name: Verify dist files
-        run: |
-          if [ -z "$(ls -A dist)" ]; then
-            echo "No distribution files (wheels or tar.gz) were located in 'dist/'. Ensure 'build-pypi' completed successfully. Exiting..."
-            exit 1
-          fi
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
 
-      # Upload distribution files to GitHub release
-      - name: Upload release assets
-        run: |
-          files=(dist/*)
-          echo "Uploading the following distribution files to the release: ${files[@]}"
-          gh release upload "$GITHUB_REF_NAME" "${files[@]}"
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_REPOSITORY }}:${{ github.sha }}
+            ${{ secrets.DOCKER_REPOSITORY }}:latest
