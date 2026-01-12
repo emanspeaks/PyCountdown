@@ -14,6 +14,7 @@ from .clock import Clock, DEFAULT_CLOCKS
 from .displayclocks import DisplayClock
 from .epoch import Epoch
 from .fmt import ClockFormatter, ThresholdSet, ClockThreshold
+from .y_doy_hms import y_doy_hms_to_sec
 
 
 JsonEpochTimeType = float | int | list[float | int] | str
@@ -101,6 +102,9 @@ def parse_epoch_time(t: JsonEpochTimeType,
         elif epochlen == 6:
             return ymdhms_to_sec(*t), TimeFormat.YMDHMS
 
+        elif epochlen == 5:
+            return y_doy_hms_to_sec(*t), TimeFormat.Y_DOY_HMS
+
         else:
             raise NotImplementedError
 
@@ -108,11 +112,42 @@ def parse_epoch_time(t: JsonEpochTimeType,
         tparts = t.strip().split('/')
         len_tparts = len(tparts)
         if len_tparts > 2:
-            raise NotImplementedError
+            # might by m/d/y hms
+            mo = int(tparts[0])
+            d = int(tparts[1])
+            tmp = tparts[2].strip().split('T')
+            if len(tmp) == 2:
+                y = tmp[0]
+                hms = tmp[1]
+
+            else:
+                tmp = tmp[0].split()
+                if len(tmp) != 2:
+                    raise NotImplementedError
+                y = tmp[0]
+                hms = tmp[1]
+
+            if y < 100:
+                y += 2000
+
+            h = int(hms[:2])
+            m = int(hms[3:5])
+            s = float(hms[6:])
+            return ymdhms_to_sec(y, mo, d, h, m, s)
         if len_tparts == 1:
             tparts = t.strip().split('\\')
             len_tparts = len(tparts)
             if len_tparts != 2:
+                # might be Y_DOY_HMS, try that:
+                tparts = t.strip().split(':')
+                len_tparts = len(tparts)
+                if len_tparts == 5:
+                    y = int(tparts[0])
+                    doy = int(tparts[1])
+                    h = int(tparts[2])
+                    m = int(tparts[3])
+                    s = float(tparts[4])
+                    return y_doy_hms_to_sec(y, doy, h, m, s)
                 raise NotImplementedError
         tmp = tparts[0]
         sign = -1 if tmp.startswith('-') else 1

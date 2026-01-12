@@ -7,15 +7,17 @@ from pyrandyos.gui.icons.thirdparty.fa5.solid import Fa5_Solid
 from pyrandyos.gui.icons.thirdparty.fa5.solid import names as fa5_s_names  # noqa: E501
 from pyrandyos.gui.icons.thirdparty.fa5 import Fa5
 from pyrandyos.gui.icons.thirdparty.fa5 import names as fa5_names  # noqa: E501
-from pyrandyos.gui.icons.thirdparty.material6 import Material6
-from pyrandyos.gui.icons.thirdparty.material6 import names as material6_names  # noqa: E501
+from pyrandyos.gui.icons.thirdparty.phosphor import Phosphor
+from pyrandyos.gui.icons.thirdparty.phosphor import names as phosphor_names  # noqa: E501
+from pyrandyos.gui.icons.thirdparty.fluentui.resize import FluentUI_Resize
+from pyrandyos.gui.icons.thirdparty.fluentui.resize import names as fluentui_r_names  # noqa: E501
 
 JsonFontGlyph = (Codicons, codicons_names.json)
 ClockFontGlyph = (Fa5, fa5_names.clock)
 SolidSqFontGlyph = (Fa5_Solid, fa5_s_names.square_full)
 BulletClockFontGlyph = (FluentUI, fluentui_names.ic_fluent_text_bullet_list_square_clock_20_regular)  # noqa: E501
-GhostFontGlyph = (Material6, material6_names.ghost)
-NoGhostFontGlyph = (Material6, material6_names.ghost_off)
+GhostFontGlyph = (Phosphor, phosphor_names.ghost_fill)
+NoGhostFontGlyph = (Phosphor, phosphor_names.ghost_light)
 UnmuteGlyph = (FluentUI, fluentui_names.ic_fluent_speaker_2_20_regular)
 MuteGlyph = (FluentUI, fluentui_names.ic_fluent_speaker_off_20_regular)
 
@@ -44,5 +46,5 @@ RefreshIcon = IconSpec.generate_iconspec(Codicons, glyph=codicons_names.refresh)
 UpArrowIcon = IconSpec.generate_iconspec(Codicons, glyph=codicons_names.arrow_up)  # noqa: E501
 DownArrowIcon = IconSpec.generate_iconspec(Codicons, glyph=codicons_names.arrow_down)  # noqa: E501
 CopyIcon = IconSpec.generate_iconspec(Codicons, glyph=codicons_names.copy)  # noqa: E501
-ThresholdSetIcon = IconSpec.generate_iconspec(Material6, glyph=material6_names.list_status)  # noqa: E501
+ThresholdSetIcon = IconSpec.generate_iconspec(FluentUI_Resize, glyph=fluentui_r_names.ic_fluent_task_list_square_settings_20_regular)  # noqa: E501
 ApplyThreshSetIcon = IconSpec.generate_iconspec(Codicons, glyph=codicons_names.checklist)  # noqa: E501
