@@ -74,6 +74,13 @@ jobs:
           
           # Extract version components (remove 'v' prefix)
           VERSION=${LATEST_TAG#v}
+          
+          # Validate that VERSION matches MAJOR.MINOR.PATCH with numeric components
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: Latest tag '$LATEST_TAG' does not follow the required format vMAJOR.MINOR.PATCH (numeric components only)."
+            exit 1
+          fi
+          
           IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
           
           # Determine version bump type based on PR labels
