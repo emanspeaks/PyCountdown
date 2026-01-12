@@ -7,7 +7,7 @@ from pyrandyos.utils.casesafe import (
 
 from .epoch import Epoch
 from .clock import Clock, DEFAULT_CLOCKS
-from .fmt import ClockFormatter
+from .fmt import ClockFormatter, ClockThreshold
 
 JsonEpochType = float | int | list[float | int]
 
@@ -28,6 +28,7 @@ class DisplayClock:
         formatter.time_format = fmt or (TimeFormat.YMDHMS
                                         if clock and clock.is_abs()
                                         else TimeFormat.DHMS)
+        self._cache: tuple[float, ClockThreshold] = None
 
     def copy(self):
         clock = self.clock
@@ -151,11 +152,11 @@ class DisplayClock:
         currentidx = [cls.pool.index(dclk) for dclk in subpool
                       if dclk in cls.pool]
 
-        # find the index of the topmost item in subpool
-        topidx = min(currentidx)
+        # get visible indices before the move
+        before_visible = [cls.get_visible_idx_for_idx(i) for i in currentidx]
 
         # get the visible index of the topmost item in subpool
-        toprow = cls.get_visible_idx_for_idx(topidx)
+        toprow = min(before_visible)
 
         # get the visible index of the visible item above the subpool topmost
         above_top_row = max(toprow - 1, 0)
@@ -171,6 +172,12 @@ class DisplayClock:
         # insert subpool at insert_idx
         cls.pool = pool[:insert_idx] + subpool + pool[insert_idx:]
 
+        # get visible indices after the move
+        after_visible = [cls.get_visible_idx_for_idx(cls.pool.index(dclk))
+                         for dclk in subpool if dclk in cls.pool]
+
+        return before_visible, after_visible
+
     @classmethod
     def move_down(cls, subpool: list['DisplayClock']):
         pool = cls.pool
@@ -178,6 +185,9 @@ class DisplayClock:
         # get the current indices of subpool
         currentidx = [cls.pool.index(dclk) for dclk in subpool
                       if dclk in cls.pool]
+
+        # get visible indices before the move
+        before_visible = [cls.get_visible_idx_for_idx(i) for i in currentidx]
 
         # find the index of the bottommost item in subpool
         bottomidx = max(currentidx)
@@ -207,10 +217,18 @@ class DisplayClock:
         else:
             cls.pool = pool + subpool
 
+        # get visible indices after the move
+        after_visible = [cls.get_visible_idx_for_idx(cls.pool.index(dclk))
+                         for dclk in subpool if dclk in cls.pool]
+
+        return before_visible, after_visible
+
     @classmethod
     def duplicate_subpool(cls, subpool: list['DisplayClock']):
         pool = cls.pool
         for dclk in subpool:
             new_dclk: DisplayClock = dclk.copy()
-            new_dclk.clk_id += '_copy'
+            clk_id = new_dclk.clk_id
+            clk_id = clk_id or '(blank)'
+            new_dclk.clk_id = clk_id + '_copy'
             pool.insert(pool.index(dclk) + 1, new_dclk)

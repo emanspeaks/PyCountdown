@@ -16,6 +16,8 @@ SCHEMA_KEY = 'json_schema'
 CLOCKS_FILE_CHECK_SEC_KEY = 'clocks_file_check_sec'
 SHOW_HIDDEN_KEY = 'show_hidden'
 LOCAL_SHOW_HIDDEN_KEY = f'local.{SHOW_HIDDEN_KEY}'
+MUTE_ALERTS_KEY = 'mute_alerts'
+LOCAL_MUTE_ALERTS_KEY = f'local.{MUTE_ALERTS_KEY}'
 
 
 class PyCountdownApp(PyRandyOSApp):
@@ -26,13 +28,19 @@ class PyCountdownApp(PyRandyOSApp):
     APP_GLOBAL_DEFAULTS = {
         'clocks_file': 'clocks.jsonc',
         CLOCKS_MTIME_KEY: None,
-        CLOCKS_FILE_CHECK_SEC_KEY: 5,
+        CLOCKS_FILE_CHECK_SEC_KEY: 10,
         CLOCKS_SCHEMA_KEY: None,
         LOCAL_CONFIG_FILE_KEY: "~/pycountdown/.pycountdown_local_config.jsonc",
     }
     APP_LOCAL_DEFAULTS = {
         SCHEMA_KEY: "https://raw.githubusercontent.com/emanspeaks/PyCountdown/refs/heads/master/pycountdown/assets/clocks.schema.jsonc",  # noqa: E501
         SHOW_HIDDEN_KEY: False,
+        'theme': "vibedark2",
+        # from Randy's default config
+        "default_width": 515,
+        "default_height": 450,
+        "always_on_top": True,
+        "always_on_top_opacity": 0.5,
     }
 
     @classmethod
@@ -106,3 +114,7 @@ class PyCountdownApp(PyRandyOSApp):
         from .lib.clocks.fmt import ThresholdSet
         data = export_clocks_jsonc(DisplayClock.pool, ThresholdSet.pool)
         save_json(clocks_file, data)
+
+    @classmethod
+    def is_muted(cls):
+        return cls.get(LOCAL_MUTE_ALERTS_KEY, False)

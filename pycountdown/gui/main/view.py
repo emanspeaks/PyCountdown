@@ -4,6 +4,8 @@ from functools import partial
 from pyrandyos.gui.qt import (
     QVBoxLayout, Qt, QToolBar, QTableWidget, QTableWidgetItem, QHeaderView,
     QObject, QEvent, QMainWindow, QShortcut, QKeySequence, QDialog,
+    QStyledItemDelegate, QPalette, QStyleOptionViewItem, QModelIndex,
+    QKeyEvent,
 )
 from pyrandyos.gui.callback import qt_callback
 from pyrandyos.gui.window import GuiWindowView
@@ -20,7 +22,7 @@ from ...lib.clocks.displayclocks import DisplayClock
 from ..gui_icons import (
     ConfigIcon, AddClockIcon, RemoveClockIcon, RefreshIcon, ClocksJsonIcon,
     SaveAsIcon, TimerIcon, OpenIcon, NewIcon, ShowHiddenIcon, ThresholdSetIcon,
-    UpArrowIcon, DownArrowIcon, CopyIcon, ApplyThreshSetIcon,
+    UpArrowIcon, DownArrowIcon, CopyIcon, ApplyThreshSetIcon, MuteIcon,
 )
 if TYPE_CHECKING:
     from .pres import MainWindow
@@ -34,7 +36,28 @@ TABLE_HPAD = TABLE_LPAD*2  # two sided
 TABLE_CELL_PADDING = f'padding: {TABLE_TPAD}px {TABLE_LPAD}px;'
 # TABLE_CELL_DEFAULT_STYLE = 'background-color: black; color: white;'
 TABLE_CELL_DEFAULT_STYLE = 'background-color: black;'
-TABLE_STYLE = f"QTableWidget {{ background-color: black; }} QTableWidget::item {{ {TABLE_CELL_PADDING} {TABLE_CELL_DEFAULT_STYLE}  }}"  # noqa: E501
+TABLE_STYLE = f"QTableWidget {{ background-color: black; }} QTableWidget::item {{ {TABLE_CELL_PADDING} {TABLE_CELL_DEFAULT_STYLE}  }} QTableWidget::item:selected {{ background-color: #1a1a1a; }}"  # noqa: E501
+
+
+class ColorPreservingDelegate(QStyledItemDelegate):
+    "Minimal delegate to preserve custom item colors."
+
+    def initStyleOption(self, option: QStyleOptionViewItem,
+                        index: QModelIndex):
+        super().initStyleOption(option, index)
+
+        # Get the item's foreground color from the model
+        foreground = index.data(Qt.ForegroundRole)
+        if foreground:
+            # Convert QBrush to QColor if needed
+            # color = (foreground.color() if isinstance(foreground, QBrush)
+            #          else foreground)
+            color = foreground
+            # Force both Text and HighlightedText to use the item's color
+            # This preserves the color regardless of selection state
+            pal: QPalette = option.palette
+            pal.setColor(pal.Text, color)
+            pal.setColor(pal.HighlightedText, color)
 
 
 class MainWindowEventFilter(QObject):
@@ -84,9 +107,50 @@ class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
     def create_shortcuts(self):
         qtobj = self.qtobj
         pres = self.gui_pres
+
         dup_shortcut = QShortcut(QKeySequence(Qt.CTRL + Qt.Key_D), qtobj)
         dup_shortcut.activated.connect(qt_callback(pres.duplicate))
         self.dup_shortcut = dup_shortcut
+
+        add_shortcut = QShortcut(QKeySequence(Qt.CTRL + Qt.Key_T), qtobj)
+        add_shortcut.activated.connect(qt_callback(pres.add_clock))
+        self.add_shortcut = add_shortcut
+
+        delete_shortcut = QShortcut(QKeySequence(Qt.Key_Delete), qtobj)
+        delete_shortcut.activated.connect(qt_callback(pres.remove_clock))
+        self.delete_shortcut = delete_shortcut
+
+        copy_shortcut = QShortcut(QKeySequence(Qt.CTRL + Qt.Key_C), qtobj)
+        copy_shortcut.activated.connect(qt_callback(pres.copy_clock))
+        self.copy_shortcut = copy_shortcut
+
+        move_up_shortcut = QShortcut(QKeySequence(Qt.CTRL + Qt.Key_Up), qtobj)
+        move_up_shortcut.activated.connect(qt_callback(pres.move_up))
+        self.move_up_shortcut = move_up_shortcut
+
+        move_down_shortcut = QShortcut(QKeySequence(Qt.CTRL + Qt.Key_Down), qtobj)  # noqa: E501
+        move_down_shortcut.activated.connect(qt_callback(pres.move_down))
+        self.move_down_shortcut = move_down_shortcut
+
+        timer_shortcut = QShortcut(QKeySequence(Qt.CTRL + Qt.Key_R), qtobj)
+        timer_shortcut.activated.connect(qt_callback(pres.add_timer))
+        self.timer_shortcut = timer_shortcut
+
+        hide_shortcut = QShortcut(QKeySequence(Qt.CTRL + Qt.Key_H), qtobj)
+        hide_shortcut.activated.connect(qt_callback(pres.toggle_show_hidden))
+        self.hide_shortcut = hide_shortcut
+
+        mute_shortcut = QShortcut(QKeySequence(Qt.CTRL + Qt.Key_M), qtobj)
+        mute_shortcut.activated.connect(qt_callback(pres.toggle_mute_alerts))
+        self.mute_shortcut = mute_shortcut
+
+        edit_shortcut = QShortcut(QKeySequence(Qt.Key_Return), qtobj)
+        edit_shortcut.activated.connect(qt_callback(pres.edit_selected_clock))
+        self.edit_shortcut = edit_shortcut
+
+        edit_shortcut2 = QShortcut(QKeySequence(Qt.Key_Enter), qtobj)
+        edit_shortcut2.activated.connect(qt_callback(pres.edit_selected_clock))
+        self.edit_shortcut2 = edit_shortcut2
 
     @load_status_step("Creating toolbars")
     @log_func_call
@@ -104,22 +168,28 @@ class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
 
         toolbar.addAction(create_action(qtobj, "Add clock",
                                         AddClockIcon.icon(),
-                                        pres.add_clock))
+                                        pres.add_clock,
+                                        tooltip="Add clock (Ctrl+T)"))
         toolbar.addAction(create_action(qtobj, "Remove clock",
                                         RemoveClockIcon.icon(),
-                                        pres.remove_clock))
+                                        pres.remove_clock,
+                                        tooltip="Remove clock (Delete)"))
         toolbar.addAction(create_action(qtobj, "Add timer",
                                         TimerIcon.icon(),
-                                        pres.add_timer))
+                                        pres.add_timer,
+                                        tooltip="Add timer (Ctrl+R)"))
         toolbar.addAction(create_action(qtobj, "Move up",
                                         UpArrowIcon.icon(),
-                                        pres.move_up))
+                                        pres.move_up,
+                                        tooltip="Move up (Ctrl+Up)"))
         toolbar.addAction(create_action(qtobj, "Move down",
                                         DownArrowIcon.icon(),
-                                        pres.move_down))
+                                        pres.move_down,
+                                        tooltip="Move down (Ctrl+Down)"))
         toolbar.addAction(create_action(qtobj, "Duplicate",
                                         CopyIcon.icon(),
-                                        pres.duplicate))
+                                        pres.duplicate,
+                                        tooltip="Duplicate (Ctrl+D)"))
 
         toolbar.addSeparator()
         show_hidden_action = create_action(qtobj, "Show hidden clocks",
@@ -127,6 +197,7 @@ class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
                                            checkable=True)
         show_hidden_action.toggled.connect(qt_callback(pres.toggle_show_hidden))  # noqa: E501
         toolbar.addAction(show_hidden_action)
+        self.show_hidden_action = show_hidden_action
         toolbar.addAction(create_action(qtobj, "Threshold Sets",
                                         ThresholdSetIcon.icon(),
                                         pres.click_threshold_sets))
@@ -151,12 +222,18 @@ class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
         toolbar.addWidget(create_toolbar_expanding_spacer())
 
         toolbar.addSeparator()
-        toolbar.addAction(create_action(qtobj, "Clocks config",
-                                        ClocksJsonIcon.icon(),
-                                        pres.click_clocks_config))
         toolbar.addAction(create_action(qtobj, "Program config",
                                         ConfigIcon.icon(),
                                         pres.click_config))
+        toolbar.addAction(create_action(qtobj, "Clocks config",
+                                        ClocksJsonIcon.icon(),
+                                        pres.click_clocks_config))
+        mute_action = create_action(qtobj, "Mute Alerts",
+                                           MuteIcon.icon(),
+                                           checkable=True)
+        mute_action.toggled.connect(qt_callback(pres.toggle_mute_alerts))
+        toolbar.addAction(mute_action)
+        self.mute_action = mute_action
 
     @log_func_call
     def create_basewidget(self):
@@ -188,6 +265,8 @@ class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
 
         table.setStyleSheet(TABLE_STYLE)
         # table.setStyleSheet("")
+        # Use delegate to preserve per-item colors when selected/hovered
+        table.setItemDelegate(ColorPreservingDelegate(table))
         table.setSortingEnabled(False)
         table.setSelectionBehavior(QTableWidget.SelectRows)
         table.setEditTriggers(QTableWidget.NoEditTriggers)  # Make readonly
@@ -198,6 +277,39 @@ class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
         vheader.setSectionResizeMode(QHeaderView.ResizeToContents)
         vheader.sectionClicked.connect(qt_callback(pres.row_header_clicked))
         table.cellDoubleClicked.connect(qt_callback(pres.row_header_clicked))
+
+        key_callback = self.table_handle_key_press
+
+        # Install event filter for arrow key wrapping
+        class TableEventFilter(QObject):
+            def eventFilter(self, obj: QObject, event: QEvent,
+                            qtobj=table, key_cb=key_callback):
+                if obj == qtobj:
+                    if event.type() == QEvent.KeyPress:
+                        return key_cb(qtobj, event)
+
+                return False
+
+        table_filter = TableEventFilter(table)
+        table.installEventFilter(table_filter)
+        self.table_filter = table_filter
+
+    def table_handle_key_press(self, table: QTableWidget,
+                               event: QKeyEvent) -> bool:
+        key = event.key()
+        row_count = table.rowCount()
+
+        if row_count == 0:
+            return False
+
+        current_row = table.currentRow()
+        if key == Qt.Key_Up and current_row == 0:
+            table.selectRow(row_count - 1)
+            return True
+        elif key == Qt.Key_Down and current_row == row_count - 1:
+            table.selectRow(0)
+            return True
+        return False
 
     @log_func_call
     def populate_clock_table(self):

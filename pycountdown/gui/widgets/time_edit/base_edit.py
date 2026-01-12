@@ -301,6 +301,10 @@ class BaseTimeEditorWidget(QtWidgetWrapper[QFrame]):
 
             return True
 
+        # Don't handle enter key
+        if key in (Qt.Key_Return, Qt.Key_Enter):
+            return False
+
         # Handle digit input
         if text and text.isdigit():
             self.write_text(text)

@@ -38,23 +38,24 @@ class ClockFormatter(TimeFormatter):
                               self.color,
                               self.thresh_set)
 
-    def get_color(self, dclock: 'DisplayClock', tai: float):
+    def get_formatting(self, dclock: 'DisplayClock', tai: float):
         thresh_set = self.thresh_set
         default = self.color or DEFAULT_COLOR
         clock = dclock.clock
         if clock and thresh_set:
             t = clock.tai_to_clock_time(tai).epoch_sec
-            color = ThresholdSet.pool[thresh_set].get_color_for_t(t)
-            return color or default
-        return default
+            thresh = ThresholdSet.pool[thresh_set].get_thresh_for_t(t)
+            return thresh.color if thresh else default, thresh
+        return default, None
 
 
 class ClockThreshold:
     def __init__(self, epoch: Epoch,
-                 color: str | list[int | float] | QColor = DEFAULT_COLOR
-                 ):
+                 color: str | list[int | float] | QColor = DEFAULT_COLOR,
+                 play_alert: bool = False):
         self.epoch = epoch
         self.color = parse_color(color)
+        self.play_alert = play_alert
 
 
 class ThresholdSet:
@@ -82,16 +83,20 @@ class ThresholdSet:
         out = [] if default is None else [default]
         return out + sorted(tmp, key=lambda x: x[1])
 
-    def get_color_for_t(self, t: float):
+    def get_thresh_for_t(self, t: float):
         idx_list = self.get_sorted_indices_by_t()
         if not idx_list:
             return
         my_list = self.thresh_list
-        color = None
+        thresh = None
         for i, tcheck in idx_list or ():
             if tcheck is None or t >= tcheck:
-                color = my_list[i].color
+                thresh = my_list[i]
             else:
-                return color
+                return thresh
+        return thresh
 
-        return color
+    def get_color_for_t(self, t: float):
+        thresh = self.get_thresh_for_t(t)
+        if thresh:
+            return thresh.color

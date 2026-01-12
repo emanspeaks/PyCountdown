@@ -1,5 +1,8 @@
-from PySide2.QtGui import QIcon
+from pyrandyos.gui.qt import QIcon
 from pyrandyos.gui.gui_app import GuiApp
+from pyrandyos.app import PyRandyOSApp
+
+from pycountdown.gui.vibedark2 import vibedark2
 
 from ..logging import (
     log_func_call as _log_func_call,
@@ -29,7 +32,12 @@ class PyCountdownGui(GuiApp):
 
     @_log_func_call
     def init_gui(self, app_args: list[str], *firstwin_args, **firstwin_kwargs):
+        orig_theme = PyRandyOSApp.get('local.theme')
+        PyRandyOSApp.set('local.theme', None)
         super().init_gui(app_args, *firstwin_args, **firstwin_kwargs)
+        self.themes.create_theme('vibedark2', vibedark2)
+        PyRandyOSApp.set('local.theme', orig_theme)
+        self.set_theme()
         self.load_icon()
         super().close_splash(self.windows[0].gui_view.qtobj)
 
