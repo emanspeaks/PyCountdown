@@ -20,7 +20,7 @@ from ...lib.clocks.displayclocks import DisplayClock
 from ..gui_icons import (
     ConfigIcon, AddClockIcon, RemoveClockIcon, RefreshIcon, ClocksJsonIcon,
     SaveAsIcon, TimerIcon, OpenIcon, NewIcon, ShowHiddenIcon, ThresholdSetIcon,
-    UpArrowIcon, DownArrowIcon, CopyIcon, ApplyThreshSetIcon,
+    UpArrowIcon, DownArrowIcon, CopyIcon, ApplyThreshSetIcon, MuteIcon,
 )
 if TYPE_CHECKING:
     from .pres import MainWindow
@@ -113,6 +113,14 @@ class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
         timer_shortcut.activated.connect(qt_callback(pres.add_timer))
         self.timer_shortcut = timer_shortcut
 
+        hide_shortcut = QShortcut(QKeySequence(Qt.CTRL + Qt.Key_H), qtobj)
+        hide_shortcut.activated.connect(qt_callback(pres.toggle_show_hidden))
+        self.hide_shortcut = hide_shortcut
+
+        mute_shortcut = QShortcut(QKeySequence(Qt.CTRL + Qt.Key_M), qtobj)
+        mute_shortcut.activated.connect(qt_callback(pres.toggle_mute_alerts))
+        self.mute_shortcut = mute_shortcut
+
         edit_shortcut = QShortcut(QKeySequence(Qt.Key_Return), qtobj)
         edit_shortcut.activated.connect(qt_callback(pres.edit_selected_clock))
         self.edit_shortcut = edit_shortcut
@@ -166,6 +174,7 @@ class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
                                            checkable=True)
         show_hidden_action.toggled.connect(qt_callback(pres.toggle_show_hidden))  # noqa: E501
         toolbar.addAction(show_hidden_action)
+        self.show_hidden_action = show_hidden_action
         toolbar.addAction(create_action(qtobj, "Threshold Sets",
                                         ThresholdSetIcon.icon(),
                                         pres.click_threshold_sets))
@@ -190,12 +199,18 @@ class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
         toolbar.addWidget(create_toolbar_expanding_spacer())
 
         toolbar.addSeparator()
-        toolbar.addAction(create_action(qtobj, "Clocks config",
-                                        ClocksJsonIcon.icon(),
-                                        pres.click_clocks_config))
         toolbar.addAction(create_action(qtobj, "Program config",
                                         ConfigIcon.icon(),
                                         pres.click_config))
+        toolbar.addAction(create_action(qtobj, "Clocks config",
+                                        ClocksJsonIcon.icon(),
+                                        pres.click_clocks_config))
+        mute_action = create_action(qtobj, "Mute Alerts",
+                                           MuteIcon.icon(),
+                                           checkable=True)
+        mute_action.toggled.connect(qt_callback(pres.toggle_mute_alerts))
+        toolbar.addAction(mute_action)
+        self.mute_action = mute_action
 
     @log_func_call
     def create_basewidget(self):

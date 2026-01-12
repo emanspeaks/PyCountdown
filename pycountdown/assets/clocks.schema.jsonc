@@ -79,6 +79,10 @@
               "color": {
                 "type": ["string", "array", "null"],
                 "description": "Color name string or RGB array defining text color for the clock label and time cells. A blank string, empty array, or `null` is the default color."
+              },
+              "play_alert": {
+                "type": "boolean",
+                "description": "Play an alert tone when the threshold is triggered"
               }
             }
             // "required": ["color"]

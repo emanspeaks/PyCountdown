@@ -7,7 +7,7 @@ from pyrandyos.utils.casesafe import (
 
 from .epoch import Epoch
 from .clock import Clock, DEFAULT_CLOCKS
-from .fmt import ClockFormatter
+from .fmt import ClockFormatter, ClockThreshold
 
 JsonEpochType = float | int | list[float | int]
 
@@ -28,6 +28,7 @@ class DisplayClock:
         formatter.time_format = fmt or (TimeFormat.YMDHMS
                                         if clock and clock.is_abs()
                                         else TimeFormat.DHMS)
+        self._cache: tuple[float, ClockThreshold] = None
 
     def copy(self):
         clock = self.clock
@@ -227,5 +228,7 @@ class DisplayClock:
         pool = cls.pool
         for dclk in subpool:
             new_dclk: DisplayClock = dclk.copy()
-            new_dclk.clk_id += '_copy'
+            clk_id = new_dclk.clk_id
+            clk_id = clk_id or '(blank)'
+            new_dclk.clk_id = clk_id + '_copy'
             pool.insert(pool.index(dclk) + 1, new_dclk)

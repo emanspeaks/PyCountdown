@@ -12,7 +12,8 @@ from ...logging import (
     log_warning,
 )
 from ...app import (
-    PyCountdownApp, CLOCKS_FILE_CHECK_SEC_KEY, LOCAL_SHOW_HIDDEN_KEY
+    PyCountdownApp, CLOCKS_FILE_CHECK_SEC_KEY, LOCAL_SHOW_HIDDEN_KEY,
+    LOCAL_MUTE_ALERTS_KEY,
 )
 # from ...lib.clocks import DEFAULT_CLOCKS, Clock
 from ...lib.clocks.displayclocks import DisplayClock
@@ -23,6 +24,7 @@ from ..dialogs.clock_editor import ClockEditorDialog
 from ..dialogs.threshset_editor import ThreshSetEditorDialog
 from ..dialogs.config import ConfigTreeDialog
 from ..dialogs.apply_tset import ApplyTSetDialog
+from ..audio import play_alert_tones, stop_all_alerts
 
 from .view import MainWindowView
 
@@ -36,6 +38,10 @@ class MainWindow(GuiWindow[MainWindowView]):
         self.refresh_clocks_file()
         self.clock_tick()
         self.create_timers()
+
+        # in order to set the initial action states correctly
+        self.toggle_show_hidden(PyCountdownApp.get(LOCAL_SHOW_HIDDEN_KEY, False))  # noqa: E501
+        self.toggle_mute_alerts(PyCountdownApp.get(LOCAL_MUTE_ALERTS_KEY, False))  # noqa: E501
 
     def create_gui_view(self, basetitle: str, *args,
                         **kwargs) -> MainWindowView:
@@ -124,9 +130,18 @@ class MainWindow(GuiWindow[MainWindowView]):
             txt = ''
             if clk:
                 txt = clk.display(now)
-                color = clk.formatter.get_color(clk, now)
+                color, thresh = clk.formatter.get_formatting(clk, now)
                 item.setTextColor(color)
                 labelitem.setTextColor(color)
+                cache = clk._cache
+                if cache:
+                    cache_t, cache_thresh = cache
+                    if cache_thresh is not thresh:
+                        # crossed a threshold
+                        if thresh.play_alert and not PyCountdownApp.is_muted():
+                            play_alert_tones()
+
+                clk._cache = (now, thresh)
 
             item.setText(txt)
 
@@ -261,7 +276,15 @@ class MainWindow(GuiWindow[MainWindowView]):
         log_info(f"Row(s) {', '.join(map(str, rows))} duplicated")
 
     @log_func_call
-    def toggle_show_hidden(self, checked: bool):
+    def toggle_show_hidden(self, checked: bool = None):
+        if checked is None:
+            checked = not PyCountdownApp.get(LOCAL_SHOW_HIDDEN_KEY, False)
+            log_info(f"Toggling show hidden to {checked}")
+
+        hidden_action = self.gui_view.show_hidden_action
+        hidden_action.setChecked(checked)
+        hidden_action.setText("Hide hidden clocks" if checked
+                              else "Show hidden clocks")
         PyCountdownApp.set(LOCAL_SHOW_HIDDEN_KEY, checked)
         self.update_table()
 
@@ -337,3 +360,15 @@ class MainWindow(GuiWindow[MainWindowView]):
         for row in rows:
             if 0 <= row < table.rowCount():
                 table.selectRow(row)
+
+    def toggle_mute_alerts(self, checked: bool = None):
+        if checked is None:
+            checked = not PyCountdownApp.get(LOCAL_MUTE_ALERTS_KEY, False)
+            log_info(f"Toggling mute alerts to {checked}")
+
+        mute_action = self.gui_view.mute_action
+        mute_action.setChecked(checked)
+        mute_action.setText("Unmute Alerts" if checked else "Mute Alerts")
+        PyCountdownApp.set(LOCAL_MUTE_ALERTS_KEY, checked)
+        if checked:
+            stop_all_alerts()

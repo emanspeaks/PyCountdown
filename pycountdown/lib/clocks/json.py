@@ -164,7 +164,7 @@ def parse_display(data: dict):
 
 def parse_threshold(data: dict):
     return ClockThreshold(parse_epoch(data.get('epoch'), skip_clock=True),
-                          data.get('color'))
+                          data.get('color'), data.get('play_alert', False))
 
 
 def parse_thresh_sets(data: dict[str, dict]):
@@ -263,7 +263,7 @@ def export_threshold_set(thrset: ThresholdSet):
 
 
 def export_threshold(x: ClockThreshold):
-    out = {'color': x.color.name()}
+    out = {'color': x.color.name(), 'play_alert': x.play_alert}
     epoch = x.epoch
     if epoch:
         out['epoch'] = export_epoch(epoch)

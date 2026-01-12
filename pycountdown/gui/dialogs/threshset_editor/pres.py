@@ -13,7 +13,6 @@ from pyrandyos.utils.time.fmt import FLOAT_FMTS
 from ....logging import log_func_call
 from ....app import PyCountdownApp
 from ....lib.clocks.fmt import ThresholdSet, ClockThreshold, DEFAULT_COLOR
-from ....lib.clocks.epoch import Epoch
 from ....lib.clocks.displayclocks import DisplayClock
 
 from .view import ThreshSetEditorDialogView
@@ -44,7 +43,8 @@ class ThreshSetEditorDialog(GuiDialog[ThreshSetEditorDialogView]):
         epoch = view.epoch_widget.get_epoch()
         thresh.epoch = epoch
         thresh.color = view.color_widget.get_color()
-        view.thresh_list.item(idx).setText(self.get_thresh_text(epoch))
+        thresh.play_alert = view.alert_chk.isChecked()
+        view.thresh_list.item(idx).setText(self.get_thresh_text(thresh))
 
     def save_and_reset_tset(self):
         self.save_and_reset_threshlist()
@@ -70,15 +70,21 @@ class ThreshSetEditorDialog(GuiDialog[ThreshSetEditorDialogView]):
         raise RuntimeError('tset_idx inconsistency')
 
     @staticmethod
-    def get_thresh_text(epoch: Epoch):
-        if not epoch:
-            return '(start)'
-        epochstr = epoch.as_fmt_str()
-        input_fmt = epoch.input_fmt
-        if input_fmt in FLOAT_FMTS:
-            epochstr += f' [{input_fmt.name.lower()}]'
+    def get_thresh_text(thresh: ClockThreshold):
+        epoch = thresh.epoch
+        if epoch:
+            txt = epoch.as_fmt_str()
+            input_fmt = epoch.input_fmt
+            if input_fmt in FLOAT_FMTS:
+                txt += f' [{input_fmt.name.lower()}]'
 
-        return epochstr
+        else:
+            txt = '(start)'
+
+        if thresh.play_alert:
+            txt += ' <alert>'
+
+        return txt
 
     @log_func_call
     def update_tset_list(self):
@@ -106,7 +112,7 @@ class ThreshSetEditorDialog(GuiDialog[ThreshSetEditorDialogView]):
         view = self.gui_view
         thresh_list = view.thresh_list
         for thr in tset.thresh_list:
-            thresh_list.addItem(self.get_thresh_text(thr.epoch))
+            thresh_list.addItem(self.get_thresh_text(thr))
 
         # # Select first item if available
         # if thresh_list.count() > 0:
@@ -126,6 +132,7 @@ class ThreshSetEditorDialog(GuiDialog[ThreshSetEditorDialogView]):
         epoch_widget.qtobj.setVisible(True)
         epoch_widget.set_values(thresh.epoch)
         view.color_widget.set_color(thresh.color)
+        view.alert_chk.setChecked(thresh.play_alert)
 
     @log_func_call
     def add_rename_tset(self, new: bool = False):

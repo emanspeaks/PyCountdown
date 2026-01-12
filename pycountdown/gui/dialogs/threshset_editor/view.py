@@ -1,11 +1,11 @@
 from typing import TYPE_CHECKING
 from functools import partial
 
-from PySide2.QtWidgets import QListWidget
+from PySide2.QtWidgets import QListWidget, QCheckBox
 
 from pyrandyos.gui.qt import (
     QVBoxLayout, QHBoxLayout, QDialogButtonBox, Qt, QKeySequence, QShortcut,
-    QPushButton, QLabel,
+    QPushButton, QLabel
 )
 from pyrandyos.gui.dialogs import GuiDialogView
 from pyrandyos.gui.callback import qt_callback
@@ -138,6 +138,10 @@ class ThreshSetEditorDialogView(GuiDialogView['ThreshSetEditorDialog']):
         color_widget = ColorButtonWidget(self, "Select Color")
         self.color_widget = color_widget
 
+        alert_chk = QCheckBox('Play alert')
+        alert_chk.setChecked(False)
+        self.alert_chk = alert_chk
+
         update_thresh_btn = QPushButton("Update threshold")
         cb = self.gui_pres.save_current_thresh
         update_thresh_btn.clicked.connect(qt_callback(cb))
@@ -145,6 +149,7 @@ class ThreshSetEditorDialogView(GuiDialogView['ThreshSetEditorDialog']):
 
         epoch_widget_hbox = epoch_widget.hbox_epoch
         epoch_widget_hbox.addWidget(color_widget.qtobj)
+        epoch_widget_hbox.addWidget(alert_chk)
         epoch_widget_hbox.addWidget(update_thresh_btn)
         layout = self.layout
         layout.addWidget(epoch_widget.qtobj)

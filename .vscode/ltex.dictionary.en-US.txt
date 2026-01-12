@@ -1,7 +1,9 @@
 absclk
+ampl
 AppConfig
 args
 barfmt
+Barycentric
 baselbl
 bool
 bottomidx
@@ -33,12 +35,15 @@ dlgbtn
 dlgbuttons
 dlgview
 dllerrs
+DOY
 drivelist
 DriveList
 Duquesnoy
 dwiffle
 dwiffles
 ENDBRAK
+eph
+ephemerides
 excnfo
 expandvars
 fdir
@@ -62,6 +67,7 @@ ipynb
 ispec
 jdumps
 jloads
+JSONC
 klass
 lastc
 lastf
@@ -89,6 +95,10 @@ nrows
 octoface
 oldtset
 outf
+overtype
+overtyped
+PgDn
+PgUp
 Pizetta
 ppath
 pyapp
@@ -101,6 +111,7 @@ pyfile
 pypi
 pyqt
 pyrandyos
+PyRandyOS
 pyrcc
 pyscript
 pyside
@@ -138,6 +149,7 @@ shwiel
 shwiels
 sigparams
 sinfo
+smplrt
 Spyder
 spyder-ide
 sstr
@@ -145,6 +157,7 @@ STARTBRAK
 stmp
 str
 tcheck
+TDB
 Teph
 tgtdir
 tkbasewidget
@@ -162,6 +175,7 @@ tset
 tsetlist
 ttffile
 TTRANS
+twopifreq
 txtbox
 TZCEN
 TZEAS
@@ -191,14 +205,3 @@ ymdhms
 YMDHMSKEYS
 ymdhmsms
 ystr
-PyRandyOS
-eph
-Barycentric
-DOY
-JSONC
-ephemerides
-overtype
-PgUp
-PgDn
-overtyped
-TDB
