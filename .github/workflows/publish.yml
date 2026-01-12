@@ -61,8 +61,8 @@ jobs:
           # Fetch all tags
           git fetch --tags
           
-          # Get the latest tag (sorted by version)
-          LATEST_TAG=$(git tag -l "v*" | sort -V | tail -n 1)
+          # Get the latest tag (sorted by version using Git's version-aware sort)
+          LATEST_TAG=$(git tag -l "v*" --sort=-version:refname | head -n 1)
           
           # If no tags exist, start with v0.0.0
           if [ -z "$LATEST_TAG" ]; then
