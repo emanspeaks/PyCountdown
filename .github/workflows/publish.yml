@@ -94,8 +94,16 @@ jobs:
           if [ -n "$PR_NUMBER" ]; then
             echo "Merge commit from PR #$PR_NUMBER"
             # Check for labels
-            LABELS=$(gh pr view "$PR_NUMBER" --json labels --jq '.labels[].name')
-            echo "PR Labels: $LABELS"
+            # Capture labels and handle failures explicitly so we can distinguish
+            # between "no labels" and "failed to fetch labels".
+            if LABELS=$(gh pr view "$PR_NUMBER" --json labels --jq '.labels[].name' 2>&1); then
+              echo "PR Labels: $LABELS"
+            else
+              echo "Warning: Failed to retrieve labels for PR #$PR_NUMBER. Defaulting to patch bump."
+              echo "gh pr view error output:"
+              echo "$LABELS"
+              LABELS=""
+            fi
             
             if echo "$LABELS" | grep -q "release:major"; then
               BUMP_TYPE="major"
