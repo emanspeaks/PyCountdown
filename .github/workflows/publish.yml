@@ -105,9 +105,9 @@ jobs:
               LABELS=""
             fi
             
-            if echo "$LABELS" | grep -q "release:major"; then
+            if echo "$LABELS" | grep -qi "release:major"; then
               BUMP_TYPE="major"
-            elif echo "$LABELS" | grep -q "release:minor"; then
+            elif echo "$LABELS" | grep -qi "release:minor"; then
               BUMP_TYPE="minor"
             fi
           else
