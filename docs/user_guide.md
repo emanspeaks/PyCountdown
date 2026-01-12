@@ -155,7 +155,7 @@ Run PyCountdown from the command line:
 python -m pycountdown
 ```
 
-On first launch, PyCountdown will create a default configuration. You can specify a clocks file:
+You can specify a global program config file to use at launch, which may contain the path to a default Clocks file:
 
 ```bash
 python -m pycountdown /path/to/clocks.jsonc
@@ -197,7 +197,7 @@ The toolbar provides quick access to all major functions (left to right):
 | **Open** | Opens an existing clocks file |
 | **Save As** | Saves the current configuration to a new file |
 | **Program config** | Opens the program settings viewer |
-| **Clocks config** | Opens the raw JSON configuration editor |
+| **Clocks config** | Opens the raw JSON Clocks file editor |
 | **Mute Alerts** | Toggles audible alert tones on/off |
 
 ### Clock Table
@@ -255,8 +255,8 @@ PyCountdown includes these pre-defined clocks that can be referenced:
 2. Fill in the clock properties:
    - **Label**: Display name for the clock
    - **Clock ID**: Optional unique identifier (defaults to label)
-   - **Epoch**: The reference time point
-   - **Reference**: Optional real-time reference for offset calculations
+   - **Epoch**: The zero reference time point
+   - **Reference**: Optional real-time reference for offset clocks
    - **Follow**: Optional clock to follow/mirror
    - **Tick rate**: Time scale for the clock
    - **Display options**: Formatting and visibility settings
