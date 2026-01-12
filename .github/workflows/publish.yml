@@ -9,8 +9,39 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  build-pypi:
+    name: Build PyPI distribution
+    runs-on: ubuntu-latest
+    # permissions:
+    #   contents: write  # Required to push back to repo
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # Important: gets full git history for versioning
+          token: ${{ secrets.GITHUB_TOKEN }}  # enables pushing
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install hatch
+
+      - name: Build package
+        run: |
+          hatch build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
   create-tag:
     name: Create Semantic Version Tag
+    needs:
+      - build-pypi
     runs-on: ubuntu-latest
     permissions:
       contents: write  # Required to create tags
@@ -97,37 +128,6 @@ jobs:
           
           echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
           echo "Successfully created and pushed tag: $NEW_TAG"
-
-  build-pypi:
-    name: Build PyPI distribution
-    needs:
-      - create-tag
-    runs-on: ubuntu-latest
-    # permissions:
-    #   contents: write  # Required to push back to repo
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0  # Important: gets full git history for versioning
-          token: ${{ secrets.GITHUB_TOKEN }}  # enables pushing
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.x"
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install hatch
-
-      - name: Build package
-        run: |
-          hatch build
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: python-package-distributions
-          path: dist/
 
   # Job to create a GitHub Release for the new tag
   create-release:
