@@ -194,7 +194,7 @@ jobs:
 
       - name: Upload release assets
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
           NEW_TAG="${{ needs.create-tag.outputs.new_tag }}"
