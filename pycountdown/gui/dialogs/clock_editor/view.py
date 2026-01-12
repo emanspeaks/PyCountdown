@@ -36,10 +36,13 @@ class ClockEditorDialogView(GuiDialogView['ClockEditorDialog']):
         pres = self.gui_pres
         timer = pres.timer
 
-        qtobj.setFixedSize(600, TIMER_HEIGHT if timer else CLOCK_HEIGHT)
-        self.layout = QVBoxLayout(qtobj)
+        qtobj.setMinimumSize(600, TIMER_HEIGHT if timer else CLOCK_HEIGHT)
+        layout = QVBoxLayout(qtobj)
+        self.layout = layout
         self.create_editor()
         self.create_dialog_buttons()
+        layout.addStretch()
+
         self.create_shortcuts()
         self.set_tab_order()
 
@@ -181,14 +184,14 @@ class ClockEditorDialogView(GuiDialogView['ClockEditorDialog']):
         digits.setValue(0)
         digits.setMinimum(0)
         digits.setMaximum(20)
-        digits.setFixedWidth(50)
+        digits.setMinimumWidth(50)
         self.digits = digits
 
         zeropad = QSpinBox()
         zeropad.setValue(0)
         zeropad.setMinimum(0)
         zeropad.setMaximum(20)
-        zeropad.setFixedWidth(50)
+        zeropad.setMinimumWidth(50)
         self.zeropad = zeropad
 
         threshset = ThreshSetListWidget(self)

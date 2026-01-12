@@ -57,6 +57,7 @@ class ClockEditorDialog(GuiDialog[ClockEditorDialogView]):
             self.save_clock()
             PyCountdownApp.export_clocks_file()
             mw.refresh_clocks_file(True)
+            mw.select_and_notify_added_clock()
 
         if btn is buttons.button(QDialogButtonBox.Ok):
             self.gui_view.qtobj.accept()
@@ -87,9 +88,9 @@ class ClockEditorDialog(GuiDialog[ClockEditorDialogView]):
             rate_chk.setVisible(is_not_blank)
             view.rate.qtobj.setVisible(is_not_blank)
 
-        view.qtobj.setFixedHeight((TIMER_HEIGHT if self.timer
-                                   else CLOCK_HEIGHT) if is_not_blank
-                                  else BLANK_HEIGHT)
+        view.qtobj.setMinimumHeight((TIMER_HEIGHT if self.timer
+                                     else CLOCK_HEIGHT) if is_not_blank
+                                    else BLANK_HEIGHT)
 
     @log_func_call
     def show(self):

@@ -21,8 +21,8 @@ class ApplyTSetDialogView(GuiDialogView['ApplyTSetDialog']):
         GuiDialogView.__init__(self, basetitle, presenter, *qtobj_args,
                                **qtobj_kwargs)
         qtobj = self.qtobj
-        # qtobj.resize(*PyCountdownApp.get_default_win_size())
-        qtobj.setMaximumWidth(1000)
+        # qtobj.resize(1000, 600)
+        # qtobj.setMaximumWidth(1000)
         self.layout = QVBoxLayout(qtobj)
         self.create_editor()
         self.create_dialog_buttons()

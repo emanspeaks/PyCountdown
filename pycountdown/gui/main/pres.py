@@ -204,12 +204,7 @@ class MainWindow(GuiWindow[MainWindowView]):
     def add_clock(self):
         dlg = ClockEditorDialog(self)
         dlg.show()
-        self.update_table()
-        pool = DisplayClock.pool
-        dclk = pool[-1]  # Assuming the newly added is the last in the pool
-        row = DisplayClock.get_visible_idx_for_idx(len(pool) - 1) + 1
-        self.gui_view.clock_table.selectRow(row - 1)
-        log_info(f"Clock {dclk.label!r} added to row {row}")
+        # self.update_table()
 
     @log_func_call
     def copy_clock(self):
@@ -231,12 +226,7 @@ class MainWindow(GuiWindow[MainWindowView]):
         #     'New clock', Clock(DEFAULT_CLOCKS['TAI'], now_tai_sec())))
         dlg = ClockEditorDialog(self, timer=True)
         dlg.show()
-        self.update_table()
-        pool = DisplayClock.pool
-        dclk = pool[-1]  # Assuming the newly added is the last in the pool
-        row = DisplayClock.get_visible_idx_for_idx(len(pool) - 1) + 1
-        self.gui_view.clock_table.selectRow(row - 1)
-        log_info(f"Clock {dclk.label!r} added to row {row}")
+        # self.update_table()
 
     @log_func_call
     def remove_clock(self, rows: int | list[int] = None):
@@ -389,3 +379,11 @@ class MainWindow(GuiWindow[MainWindowView]):
         PyCountdownApp.set(LOCAL_MUTE_ALERTS_KEY, checked)
         if checked:
             stop_all_alerts()
+
+    def select_and_notify_added_clock(self):
+        pool = DisplayClock.pool
+        if pool:
+            dclk = pool[-1]  # Assuming the newly added is last in pool
+            row = DisplayClock.get_visible_idx_for_idx(len(pool) - 1) + 1
+            self.gui_view.clock_table.selectRow(row - 1)
+            log_info(f"Clock {dclk.label!r} added to row {row}")

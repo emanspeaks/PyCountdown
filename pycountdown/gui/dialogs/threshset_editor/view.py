@@ -26,7 +26,7 @@ class ThreshSetEditorDialogView(GuiDialogView['ThreshSetEditorDialog']):
                                **qtobj_kwargs)
         qtobj = self.qtobj
 
-        qtobj.setFixedSize(600, 400)
+        qtobj.setMinimumSize(600, 400)
         self.layout = QVBoxLayout(qtobj)
         self.create_editor()
         self.create_dialog_buttons()
