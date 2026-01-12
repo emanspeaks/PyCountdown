@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - master
+    tags-ignore:
+      - 'v*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -121,9 +123,15 @@ jobs:
           NEW_TAG="v${MAJOR}.${MINOR}.${PATCH}"
           echo "New tag: $NEW_TAG"
           
-          # Check if tag already exists
+          # Check if tag already exists locally or remotely
           if git rev-parse "$NEW_TAG" >/dev/null 2>&1; then
-            echo "Error: Tag $NEW_TAG already exists!"
+            echo "Error: Tag $NEW_TAG already exists locally!"
+            exit 1
+          fi
+          
+          # Check if tag exists on remote to prevent race conditions
+          if git ls-remote --tags origin | grep -q "refs/tags/$NEW_TAG$"; then
+            echo "Error: Tag $NEW_TAG already exists on remote!"
             exit 1
           fi
           
