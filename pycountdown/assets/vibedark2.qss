@@ -500,12 +500,12 @@ QListView::item, QTableView::item {
 QListView::item:selected, QTableView::item:selected {
     background: #1d61a5;        /* --accent-blue */
     border: 1px solid #1d61a5;  /* Match selection color for consistent sizing */
-    color: #ffffff;
+    /* color: #ffffff; */
 }
 QListView::item:hover, QTableView::item:hover {
     background: #444a5a;        /* --bg-hover */
     border: 1px solid #444a5a;  /* Match hover color for consistent sizing */
-    color: #ffffff;
+    /* color: #ffffff; */
 }
 
 /* QSpinBox, QDoubleSpinBox - special button styling */

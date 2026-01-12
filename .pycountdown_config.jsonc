@@ -4,7 +4,7 @@
   "file_log_level": "debug",
   // "file_log_level": "debuglow",
   // "file_log_level": "debuglow2",
-  "log_timestamp_name": false,
+  "log_timestamp_name": false//,
   // "append_log": true,
   // "tmp_dir": "tmp",
   // "log_trace_enabled": true,

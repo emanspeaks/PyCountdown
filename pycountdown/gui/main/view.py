@@ -4,6 +4,8 @@ from functools import partial
 from pyrandyos.gui.qt import (
     QVBoxLayout, Qt, QToolBar, QTableWidget, QTableWidgetItem, QHeaderView,
     QObject, QEvent, QMainWindow, QShortcut, QKeySequence, QDialog,
+    QStyledItemDelegate, QPalette, QStyleOptionViewItem, QModelIndex,
+    QKeyEvent,
 )
 from pyrandyos.gui.callback import qt_callback
 from pyrandyos.gui.window import GuiWindowView
@@ -34,7 +36,28 @@ TABLE_HPAD = TABLE_LPAD*2  # two sided
 TABLE_CELL_PADDING = f'padding: {TABLE_TPAD}px {TABLE_LPAD}px;'
 # TABLE_CELL_DEFAULT_STYLE = 'background-color: black; color: white;'
 TABLE_CELL_DEFAULT_STYLE = 'background-color: black;'
-TABLE_STYLE = f"QTableWidget {{ background-color: black; }} QTableWidget::item {{ {TABLE_CELL_PADDING} {TABLE_CELL_DEFAULT_STYLE}  }}"  # noqa: E501
+TABLE_STYLE = f"QTableWidget {{ background-color: black; }} QTableWidget::item {{ {TABLE_CELL_PADDING} {TABLE_CELL_DEFAULT_STYLE}  }} QTableWidget::item:selected {{ background-color: #1a1a1a; }}"  # noqa: E501
+
+
+class ColorPreservingDelegate(QStyledItemDelegate):
+    "Minimal delegate to preserve custom item colors."
+
+    def initStyleOption(self, option: QStyleOptionViewItem,
+                        index: QModelIndex):
+        super().initStyleOption(option, index)
+
+        # Get the item's foreground color from the model
+        foreground = index.data(Qt.ForegroundRole)
+        if foreground:
+            # Convert QBrush to QColor if needed
+            # color = (foreground.color() if isinstance(foreground, QBrush)
+            #          else foreground)
+            color = foreground
+            # Force both Text and HighlightedText to use the item's color
+            # This preserves the color regardless of selection state
+            pal: QPalette = option.palette
+            pal.setColor(pal.Text, color)
+            pal.setColor(pal.HighlightedText, color)
 
 
 class MainWindowEventFilter(QObject):
@@ -242,6 +265,8 @@ class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
 
         table.setStyleSheet(TABLE_STYLE)
         # table.setStyleSheet("")
+        # Use delegate to preserve per-item colors when selected/hovered
+        table.setItemDelegate(ColorPreservingDelegate(table))
         table.setSortingEnabled(False)
         table.setSelectionBehavior(QTableWidget.SelectRows)
         table.setEditTriggers(QTableWidget.NoEditTriggers)  # Make readonly
@@ -252,6 +277,39 @@ class MainWindowView(GuiWindowView['MainWindow', GuiViewBaseFrame]):
         vheader.setSectionResizeMode(QHeaderView.ResizeToContents)
         vheader.sectionClicked.connect(qt_callback(pres.row_header_clicked))
         table.cellDoubleClicked.connect(qt_callback(pres.row_header_clicked))
+
+        key_callback = self.table_handle_key_press
+
+        # Install event filter for arrow key wrapping
+        class TableEventFilter(QObject):
+            def eventFilter(self, obj: QObject, event: QEvent,
+                            qtobj=table, key_cb=key_callback):
+                if obj == qtobj:
+                    if event.type() == QEvent.KeyPress:
+                        return key_cb(qtobj, event)
+
+                return False
+
+        table_filter = TableEventFilter(table)
+        table.installEventFilter(table_filter)
+        self.table_filter = table_filter
+
+    def table_handle_key_press(self, table: QTableWidget,
+                               event: QKeyEvent) -> bool:
+        key = event.key()
+        row_count = table.rowCount()
+
+        if row_count == 0:
+            return False
+
+        current_row = table.currentRow()
+        if key == Qt.Key_Up and current_row == 0:
+            table.selectRow(row_count - 1)
+            return True
+        elif key == Qt.Key_Down and current_row == row_count - 1:
+            table.selectRow(0)
+            return True
+        return False
 
     @log_func_call
     def populate_clock_table(self):

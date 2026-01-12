@@ -155,7 +155,12 @@ class MainWindow(GuiWindow[MainWindowView]):
 
     @log_func_call(DEBUGLOW2)
     def update_table(self):
-        self.gui_view.populate_clock_table()
+        view = self.gui_view
+        view.populate_clock_table()
+        table = view.clock_table
+        if table.rowCount():
+            view.clock_table.selectRow(0)
+
         self.clock_tick()
 
     @log_func_call
@@ -198,6 +203,7 @@ class MainWindow(GuiWindow[MainWindowView]):
         pool = DisplayClock.pool
         dclk = pool[-1]  # Assuming the newly added is the last in the pool
         row = DisplayClock.get_visible_idx_for_idx(len(pool) - 1) + 1
+        self.gui_view.clock_table.selectRow(row - 1)
         log_info(f"Clock {dclk.label!r} added to row {row}")
 
     @log_func_call
@@ -224,6 +230,7 @@ class MainWindow(GuiWindow[MainWindowView]):
         pool = DisplayClock.pool
         dclk = pool[-1]  # Assuming the newly added is the last in the pool
         row = DisplayClock.get_visible_idx_for_idx(len(pool) - 1) + 1
+        self.gui_view.clock_table.selectRow(row - 1)
         log_info(f"Clock {dclk.label!r} added to row {row}")
 
     @log_func_call
@@ -249,12 +256,15 @@ class MainWindow(GuiWindow[MainWindowView]):
             if reply != QMessageBox.Yes:
                 return
 
+        pool = DisplayClock.pool
         for r, dc in r_dclks:
             log_info(f"Removing clock {dc.label!r} at row {r + 1}")
-            DisplayClock.pool.remove(dc)
+            pool.remove(dc)
 
         PyCountdownApp.export_clocks_file()
         self.refresh_clocks_file(True)
+        if pool:
+            self.gui_view.clock_table.selectRow(0)
         return True
 
     @log_func_call
@@ -273,6 +283,7 @@ class MainWindow(GuiWindow[MainWindowView]):
                                         for r in rows])
         PyCountdownApp.export_clocks_file()
         self.refresh_clocks_file(True)
+        self.gui_view.clock_table.selectRow(min(rows))
         log_info(f"Row(s) {', '.join(map(str, rows))} duplicated")
 
     @log_func_call
