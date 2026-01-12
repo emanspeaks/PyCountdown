@@ -14,8 +14,10 @@ jobs:
   build-pypi:
     name: Build PyPI distribution
     runs-on: ubuntu-latest
-    # permissions:
-    #   contents: write  # Required to push back to repo
+    permissions:
+      contents: write  # Required to push back to repo
+    outputs:
+      new_tag: ${{ steps.create_tag.outputs.new_tag }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -30,30 +32,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install hatch
-
-      - name: Build package
-        run: |
-          hatch build
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: python-package-distributions
-          path: dist/
-
-  create-tag:
-    name: Create Semantic Version Tag
-    needs:
-      - build-pypi
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write  # Required to create tags
-    outputs:
-      new_tag: ${{ steps.create_tag.outputs.new_tag }}
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0  # Important: gets full git history for versioning
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get latest tag and determine next version
         id: create_tag
@@ -146,20 +124,33 @@ jobs:
             exit 1
           fi
           
-          # Create and push the new tag
+          # Create the new tag locally (don't push yet)
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag -a "$NEW_TAG" -m "Release $NEW_TAG"
-          git push origin "$NEW_TAG"
           
           echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
-          echo "Successfully created and pushed tag: $NEW_TAG"
+          echo "Successfully created local tag: $NEW_TAG"
+
+      - name: Build package
+        run: |
+          hatch build
+
+      - name: Push tag to remote
+        run: |
+          NEW_TAG="${{ steps.create_tag.outputs.new_tag }}"
+          git push origin "$NEW_TAG"
+          echo "Successfully pushed tag: $NEW_TAG"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
 
   # Job to create a GitHub Release for the new tag
   create-release:
     name: Create GitHub Release
     needs:
-      - create-tag
       - build-pypi
     runs-on: ubuntu-latest
     permissions:
@@ -170,7 +161,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
-          NEW_TAG="${{ needs.create-tag.outputs.new_tag }}"
+          NEW_TAG="${{ needs.build-pypi.outputs.new_tag }}"
           
           # Check if release already exists
           if gh release view "$NEW_TAG" >/dev/null 2>&1; then
@@ -190,7 +181,6 @@ jobs:
   upload-release-assets:
     name: Upload distributions to GitHub Release
     needs:
-      - create-tag
       - build-pypi
       - create-release
     runs-on: ubuntu-latest
@@ -207,7 +197,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
-          NEW_TAG="${{ needs.create-tag.outputs.new_tag }}"
+          NEW_TAG="${{ needs.build-pypi.outputs.new_tag }}"
           
           # Verify files exist before uploading
           shopt -s nullglob
