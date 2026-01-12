@@ -1,4 +1,5 @@
 from pathlib import Path
+from threading import Lock
 
 from pyrandyos.gui.qt import QTimer, Qt, QFileDialog, QMessageBox
 from pyrandyos.gui.callback import qt_callback
@@ -34,6 +35,7 @@ UserRole = Qt.UserRole
 class MainWindow(GuiWindow[MainWindowView]):
     @log_func_call
     def __init__(self):
+        self._update_lock = Lock()
         super().__init__(f'{PyCountdownApp.APP_NAME} v{__version__}')
         self.refresh_clocks_file()
         self.clock_tick()
@@ -123,43 +125,46 @@ class MainWindow(GuiWindow[MainWindowView]):
         now = now_tai_sec()
 
         table = self.gui_view.clock_table
-        for i in range(table.rowCount()):
-            labelitem = table.item(i, 0)
-            item = table.item(i, 1)
-            clk: DisplayClock = item.data(UserRole)
-            txt = ''
-            if clk:
-                txt = clk.display(now)
-                color, thresh = clk.formatter.get_formatting(clk, now)
-                item.setTextColor(color)
-                labelitem.setTextColor(color)
-                cache = clk._cache
-                if cache:
-                    cache_t, cache_thresh = cache
-                    if cache_thresh is not thresh:
-                        # crossed a threshold
-                        if thresh.play_alert and not PyCountdownApp.is_muted():
-                            play_alert_tones()
+        with self._update_lock:
+            for i in range(table.rowCount()):
+                labelitem = table.item(i, 0)
+                item = table.item(i, 1)
+                clk: DisplayClock = item.data(UserRole)
+                txt = ''
+                if clk:
+                    txt = clk.display(now)
+                    color, thresh = clk.formatter.get_formatting(clk, now)
+                    item.setTextColor(color)
+                    labelitem.setTextColor(color)
+                    cache = clk._cache
+                    if cache:
+                        cache_t, cache_thresh = cache
+                        if cache_thresh is not thresh:
+                            # crossed a threshold
+                            muted = PyCountdownApp.is_muted()
+                            if thresh.play_alert and not muted:
+                                play_alert_tones()
 
-                clk._cache = (now, thresh)
+                    clk._cache = (now, thresh)
 
-            item.setText(txt)
+                item.setText(txt)
 
     @log_func_call(DEBUGLOW2)
     def refresh_clocks_file(self, force: bool = False):
         logfunc = log_info if force else log_debuglow
         logfunc('checking clocks file')
         if PyCountdownApp.check_clocks_file(force):
-            log_info('clocks file reloaded')
             self.update_table()
+            log_info('clocks file reloaded')
 
     @log_func_call(DEBUGLOW2)
     def update_table(self):
-        view = self.gui_view
-        view.populate_clock_table()
-        table = view.clock_table
-        if table.rowCount():
-            view.clock_table.selectRow(0)
+        with self._update_lock:
+            view = self.gui_view
+            view.populate_clock_table()
+            table = view.clock_table
+            if table.rowCount():
+                view.clock_table.selectRow(0)
 
         self.clock_tick()
 
@@ -379,7 +384,7 @@ class MainWindow(GuiWindow[MainWindowView]):
 
         mute_action = self.gui_view.mute_action
         mute_action.setChecked(checked)
-        mute_action.setText("Unmute Alerts (Ctrl+M)" if checked 
+        mute_action.setText("Unmute Alerts (Ctrl+M)" if checked
                             else "Mute Alerts (Ctrl+M)")
         PyCountdownApp.set(LOCAL_MUTE_ALERTS_KEY, checked)
         if checked:
