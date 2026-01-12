@@ -103,7 +103,10 @@ jobs:
               BUMP_TYPE="minor"
             fi
           else
-            echo "No PR found for this merge commit, defaulting to patch bump"
+            echo "No PR found for this commit. This may occur for:"
+            echo "  - Direct pushes to master (not through a PR)"
+            echo "  - Commits not yet indexed by the GitHub API"
+            echo "Defaulting to patch bump"
           fi
           
           echo "Bump type: $BUMP_TYPE"
