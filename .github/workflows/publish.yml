@@ -77,8 +77,8 @@ jobs:
           IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
           
           # Determine version bump type based on PR labels
-          # Get the PR number from the merge commit
-          PR_NUMBER=$(gh pr list --state merged --json number,mergeCommit --jq ".[] | select(.mergeCommit.oid == \"${{ github.sha }}\") | .number" | head -n 1)
+          # Get the PR number associated with the current commit using the GitHub API
+          PR_NUMBER=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/pulls" --jq '.[0].number' 2>/dev/null || true)
           
           BUMP_TYPE="patch"  # Default to patch
           
