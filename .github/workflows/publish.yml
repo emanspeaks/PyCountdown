@@ -66,9 +66,9 @@ jobs:
           # Get the latest tag (sorted by version using Git's version-aware sort)
           LATEST_TAG=$(git tag -l "v*" --sort=-version:refname | head -n 1)
           
-          # If no tags exist, start with v0.0.0
+          # If no tags exist, start with v0.1.0
           if [ -z "$LATEST_TAG" ]; then
-            LATEST_TAG="v0.0.0"
+            LATEST_TAG="v0.1.0"
             echo "No existing tags found. Starting with $LATEST_TAG"
           else
             echo "Latest tag: $LATEST_TAG"
