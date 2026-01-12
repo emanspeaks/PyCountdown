@@ -4,7 +4,7 @@ MCC-style countdown clocks
 
 ## Documentation
 
-See the [User Manual](docs/USER_MANUAL.md) for comprehensive usage instructions.
+See the [User Manual](docs/user_guide.md) for comprehensive usage instructions.
 
 ## Develop
 
