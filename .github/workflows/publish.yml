@@ -174,17 +174,16 @@ jobs:
           
           # Check if release already exists
           if gh release view "$NEW_TAG" >/dev/null 2>&1; then
-            echo "Release $NEW_TAG already exists, skipping creation"
-            exit 0
+            echo "::warning::Release $NEW_TAG already exists, skipping creation"
+          else
+            # Create the release
+            gh release create "$NEW_TAG" \
+              --title "Release $NEW_TAG" \
+              --notes "Automated release for $NEW_TAG" \
+              --target master
+            
+            echo "Successfully created release: $NEW_TAG"
           fi
-          
-          # Create the release
-          gh release create "$NEW_TAG" \
-            --title "Release $NEW_TAG" \
-            --generate-notes \
-            --target "${{ github.ref_name }}"
-          
-          echo "Successfully created release: $NEW_TAG"
 
   # Job to upload built distributions as GitHub Release assets
   # Runs after the release is created
