@@ -105,7 +105,7 @@ PyCountdown is a desktop application for displaying and managing multiple countd
 - Absolute time clocks in various time scales (UTC, TAI, GPS Time, etc.)
 - US timezone clocks with DST handling
 - Customizable display formats
-- Color-coded thresholds for visual alerts
+- Color-coded thresholds for visual and audible alerts
 - Persistent clock configurations via JSON file
 - Always-on-top window mode with opacity control
 
@@ -196,8 +196,9 @@ The toolbar provides quick access to all major functions (left to right):
 | **New** | Creates a new empty clocks configuration |
 | **Open** | Opens an existing clocks file |
 | **Save As** | Saves the current configuration to a new file |
-| **Clocks config** | Opens the raw JSON configuration editor |
 | **Program config** | Opens the program settings viewer |
+| **Clocks config** | Opens the raw JSON configuration editor |
+| **Mute Alerts** | Toggles audible alert tones on/off |
 
 ### Clock Table
 
@@ -211,11 +212,13 @@ The main display shows all clocks in a two-column table:
 - Click a row to select a single clock
 - Hold Ctrl and click to select multiple clocks
 - Hold Shift and click to select a range of clocks
+- Use **Up** and **Down** arrow keys to navigate selection (wraps around at ends)
 
 #### Editing Clocks
 
 - Double-click any row to open the clock editor for that clock
 - Click the row header (row number) to open the clock editor
+- Press **Enter** to edit the selected clock
 
 ---
 
@@ -504,7 +507,7 @@ A threshold set is a list of thresholds, each defining:
 - An **epoch** (time value)
 - A **color** to display when the clock time reaches that threshold
 
-The clock displays the color of the most recent threshold (chronologically) that has been reached.
+The clock displays the color of the most recent threshold (chronologically) that has been reached. When a clock transitions to a new threshold (the time crosses the threshold epoch), an audible alert tone is played (unless muted).
 
 ### Creating and Managing Threshold Sets
 
@@ -668,6 +671,9 @@ Note that settings prefixed with `local.` may be set, changed, or overridden by 
 | **Ctrl+R**       | Main window                         | Add new timer                             |
 | **Ctrl+D**       | Main window                         | Duplicate selected clock(s)               |
 | **Ctrl+C**       | Main window                         | Copy text of selected clocks to clipboard |
+| **Ctrl+H**       | Main window                         | Toggle show hidden clocks                 |
+| **Ctrl+M**       | Main window                         | Toggle mute audible alerts                |
+| **Up/Down**      | Main window                         | Navigate clock selection (wraps at ends)  |
 | **Ctrl+Up**      | Main window                         | Move selected clock(s) up                 |
 | **Ctrl+Down**    | Main window                         | Move selected clock(s) down               |
 | **Enter**        | Main window                         | Edit selected clock (single selection)    |
