@@ -294,8 +294,8 @@ class MainWindow(GuiWindow[MainWindowView]):
 
         hidden_action = self.gui_view.show_hidden_action
         hidden_action.setChecked(checked)
-        hidden_action.setText("Hide hidden clocks" if checked
-                              else "Show hidden clocks")
+        hidden_action.setText("Hide hidden clocks (Ctrl+H)" if checked
+                              else "Show hidden clocks (Ctrl+H)")
         PyCountdownApp.set(LOCAL_SHOW_HIDDEN_KEY, checked)
         self.update_table()
 
@@ -379,7 +379,8 @@ class MainWindow(GuiWindow[MainWindowView]):
 
         mute_action = self.gui_view.mute_action
         mute_action.setChecked(checked)
-        mute_action.setText("Unmute Alerts" if checked else "Mute Alerts")
+        mute_action.setText("Unmute Alerts (Ctrl+M)" if checked 
+                            else "Mute Alerts (Ctrl+M)")
         PyCountdownApp.set(LOCAL_MUTE_ALERTS_KEY, checked)
         if checked:
             stop_all_alerts()

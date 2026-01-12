@@ -21,9 +21,6 @@ def generate_tone(freq_hz: float = 440,
     ampl = MAXVAL*volume
     twopifreq_smplrt = 2*pi*freq_hz/sample_rate_hz
 
-    def envelope(i: int):
-        return
-
     return b''.join(pack(PACK_FMT,
                          int(ampl
                              * min(i/fade, 1)

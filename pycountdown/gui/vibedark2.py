@@ -23,7 +23,7 @@ def vibedark2(app: QtApp):
     palette.setColor(QPalette.BrightText, QColor(255, 0, 0))
     palette.setColor(QPalette.Link, QColor(42, 130, 218))
     palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
-    palette.setColor(QPalette.HighlightedText, QColor(0, 0, 0))
+    palette.setColor(QPalette.HighlightedText, QColor(255, 255, 255))
     # Supplement missing roles from dark()
     palette.setColor(QPalette.Light, QColor(180, 180, 180))
     palette.setColor(QPalette.Midlight, QColor(90, 90, 90))

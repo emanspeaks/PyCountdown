@@ -4,9 +4,6 @@ from PySide2.QtMultimedia import QAudioOutput, QAudioFormat, QAudio
 from ..lib.tones.constants import ALERT_SEQ
 from ..lib.tones.gen import generate_tone, BITRATE
 
-# Keep references to active audio players to prevent garbage collection
-_active_players = set()
-
 
 class AudioPlayer:
     def __init__(self, audio_data: bytes, sample_rate_hz: int):
@@ -28,17 +25,23 @@ class AudioPlayer:
         self.audio_output.stateChanged.connect(self._on_state_changed)
 
     def start(self):
-        """Start audio playback."""
         self.audio_output.start(self.buffer)
+        
+    def stop(self):
+        self.audio_output.stop()
 
     def _on_state_changed(self, state):
-        """Remove from active set when playback finishes."""
+        "Remove from active set when playback finishes."
         if state == QAudio.IdleState:
             _active_players.discard(self)
 
 
+# Keep references to active audio players to prevent garbage collection
+_active_players: set[AudioPlayer] = set()
+
+
 def play_alert_tones(sample_rate_hz: int = 48000):
-    """Play alert tone sequence. Uses main thread event loop for playback."""
+    "Play alert tone sequence. Uses main thread event loop for playback."
     # Pre-generate all tone data and concatenate
     data = b''.join(generate_tone(freq_hz, dur_s, sample_rate_hz, vol)
                     for freq_hz, dur_s, vol in ALERT_SEQ)
@@ -50,8 +53,6 @@ def play_alert_tones(sample_rate_hz: int = 48000):
 
 
 def stop_all_alerts():
-    """Stop all currently playing alert tones."""
-    for player in list(_active_players):
-        player: AudioPlayer
-        player.audio_output.stop()
-        _active_players.discard(player)
+    "Stop all currently playing alert tones."
+    for player in _active_players:
+        player.stop()
