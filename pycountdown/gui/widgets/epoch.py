@@ -11,7 +11,7 @@ from pyrandyos.gui.callback import qt_callback
 from pyrandyos.utils.time.fmt import FLOAT_FMTS, TimeFormat
 from pyrandyos.utils.time.now import now_tai_sec
 
-from ...logging import log_func_call, log_warning  # , log_info
+from ...logging import log_func_call, log_warning, log_info
 from ...lib.clocks.epoch import Epoch
 from ...lib.clocks.displayclocks import NOW_ID, DisplayClock
 # from pyrandyos.gui.widgets.time_edit.dhms import DhmsWidget
@@ -405,19 +405,26 @@ class EpochWidget(QtWidgetWrapper[QFrame]):
         new_id = clocklist.get_clock_id()
         old_id = self.last_clock_id
         if checked and old_id is not None and old_id != new_id:
-            old_clk = DisplayClock.get_clock_for_id(old_id)
-            new_clk = DisplayClock.get_clock_for_id(new_id)
-            epoch = self.get_epoch()
-            epoch.clock = old_clk
-            epoch_tai = epoch.to_tai().epoch_sec
-            try:
-                new_epoch_sec = new_clk.tai_to_clock_time(epoch_tai).epoch_sec
-            except NotImplementedError:
-                log_warning('Converting between clocks of different tick '
-                            'rates that are not absolute clocks is currently '
-                            'unsupported; conversion not performed.')
+            if NOW_ID in (new_id, old_id):
+                log_info('Note: Conversions with (now) reset epoch to zero')
+                checked = False  # pretend it's not checked
+                self.update_epoch_sec(None, 0)
+
             else:
-                self.update_epoch_sec(None, new_epoch_sec)
+                old_clk = DisplayClock.get_clock_for_id(old_id)
+                new_clk = DisplayClock.get_clock_for_id(new_id)
+                epoch = self.get_epoch()
+                epoch.clock = old_clk
+                epoch_tai = epoch.to_tai().epoch_sec
+                try:
+                    new_epoch = new_clk.tai_to_clock_time(epoch_tai)
+                except NotImplementedError:
+                    log_warning('Converting between clocks of different tick '
+                                'rates that are not absolute clocks is '
+                                'currently unsupported; '
+                                'conversion not performed.')
+                else:
+                    self.update_epoch_sec(None, new_epoch.epoch_sec)
 
         # always do this, even if we don't convert
         self.last_clock_id = new_id
