@@ -7,15 +7,7 @@ from ..app import PyCountdownApp
 
 
 class AudioPlayer:
-    def __init__(self, audio_data: bytes, sample_rate_hz: int):
-        audio_format = QAudioFormat()
-        audio_format.setSampleRate(sample_rate_hz)
-        audio_format.setChannelCount(1)
-        audio_format.setSampleSize(BITRATE)
-        audio_format.setCodec("audio/pcm")
-        audio_format.setByteOrder(QAudioFormat.LittleEndian)
-        audio_format.setSampleType(QAudioFormat.SignedInt)
-
+    def __init__(self, audio_data: bytes, audio_format: QAudioFormat):
         # Store as instance attributes to prevent garbage collection
         self.byte_array = QByteArray(audio_data)  # this needs to stay alive
         self.buffer = QBuffer(self.byte_array)  # this is a pointer to buffer
@@ -39,17 +31,40 @@ class AudioPlayer:
 
 # Keep references to active audio players to prevent garbage collection
 _active_players: set[AudioPlayer] = set()
+TONE_DATA = None
+CACHED_SAMPLE_RATE_HZ = None
+CACHED_AUDIO_FORMAT = None
+
+
+def get_cached_tone_data(sample_rate_hz: int = 48000):
+    global TONE_DATA
+    global CACHED_SAMPLE_RATE_HZ
+    global CACHED_AUDIO_FORMAT
+    if (not TONE_DATA or not CACHED_AUDIO_FORMAT
+            or sample_rate_hz != CACHED_SAMPLE_RATE_HZ):
+        user_vol = PyCountdownApp.get('local.alert_volume_pct', 50)/100
+        data = b''.join(generate_tone(freq_hz, dur_s, sample_rate_hz,
+                                      user_vol*vol)
+                        for freq_hz, dur_s, vol in ALERT_SEQ)
+        TONE_DATA = data
+        CACHED_SAMPLE_RATE_HZ = sample_rate_hz
+
+        audio_format = QAudioFormat()
+        audio_format.setSampleRate(CACHED_SAMPLE_RATE_HZ)
+        audio_format.setChannelCount(1)
+        audio_format.setSampleSize(BITRATE)
+        audio_format.setCodec("audio/pcm")
+        audio_format.setByteOrder(QAudioFormat.LittleEndian)
+        audio_format.setSampleType(QAudioFormat.SignedInt)
+        CACHED_AUDIO_FORMAT = audio_format
+
+    return TONE_DATA, CACHED_AUDIO_FORMAT
 
 
 def play_alert_tones(sample_rate_hz: int = 48000):
     "Play alert tone sequence. Uses main thread event loop for playback."
-    # Pre-generate all tone data and concatenate
-    user_vol = PyCountdownApp.get('local.alert_volume_pct', 50)/100
-    data = b''.join(generate_tone(freq_hz, dur_s, sample_rate_hz, user_vol*vol)
-                    for freq_hz, dur_s, vol in ALERT_SEQ)
-
     # Create player and keep reference alive until playback completes
-    player = AudioPlayer(data, sample_rate_hz)
+    player = AudioPlayer(*get_cached_tone_data())
     _active_players.add(player)
     player.start()
 
