@@ -11,7 +11,7 @@ from pyrandyos.gui.callback import qt_callback
 from pyrandyos.utils.time.fmt import FLOAT_FMTS, TimeFormat
 from pyrandyos.utils.time.now import now_tai_sec
 
-from ...logging import log_func_call  # , log_info
+from ...logging import log_func_call, log_warning  # , log_info
 from ...lib.clocks.epoch import Epoch
 from ...lib.clocks.displayclocks import NOW_ID, DisplayClock
 # from pyrandyos.gui.widgets.time_edit.dhms import DhmsWidget
@@ -399,6 +399,7 @@ class EpochWidget(QtWidgetWrapper[QFrame]):
                      self.input_fmt)
 
     def do_convert(self, chkbox: bool, state: int | Qt.CheckState = None):
+        "this is the handler for changing the selected clock"
         checked = self.convert.isChecked()
         clocklist = self.clocklist
         new_id = clocklist.get_clock_id()
@@ -409,7 +410,14 @@ class EpochWidget(QtWidgetWrapper[QFrame]):
             epoch = self.get_epoch()
             epoch.clock = old_clk
             epoch_tai = epoch.to_tai().epoch_sec
-            new_epoch_sec = new_clk.tai_to_clock_time(epoch_tai).epoch_sec
-            self.update_epoch_sec(None, new_epoch_sec)
+            try:
+                new_epoch_sec = new_clk.tai_to_clock_time(epoch_tai).epoch_sec
+            except NotImplementedError:
+                log_warning('Converting between clocks of different tick '
+                            'rates that are not absolute clocks is currently '
+                            'unsupported; conversion not performed.')
+            else:
+                self.update_epoch_sec(None, new_epoch_sec)
 
+        # always do this, even if we don't convert
         self.last_clock_id = new_id

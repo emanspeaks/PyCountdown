@@ -6,6 +6,7 @@ from pyrandyos.config.keys import LOCAL_CONFIG_FILE_KEY
 
 from .logging import log_func_call
 from .lib.clocks.json import parse_clocks_jsonc, export_clocks_jsonc
+from .lib.fileio import safe_file_io, safe_file_io_retry
 
 HERE = Path(__file__).parent
 
@@ -41,13 +42,19 @@ class PyCountdownApp(PyRandyOSApp):
         "default_height": 450,
         "always_on_top": True,
         "always_on_top_opacity": 0.5,
+        "alert_volume_pct": 50
     }
 
     @classmethod
     @log_func_call
     def main(cls, input_data: dict | str | Path = None, *args,
              **kwargs):
+        global_config_arg = input_data
         cls.init_main(input_data, True, **kwargs)
+        if isinstance(global_config_arg, str):
+            global_config_arg = Path(global_config_arg)
+
+        cls.set('global_config', global_config_arg)
 
         from .gui import PyCountdownGui
         gui = PyCountdownGui(args)
@@ -88,20 +95,24 @@ class PyCountdownApp(PyRandyOSApp):
         clocks_file = cls.get_clocks_file_path()
         old_mtime: float = cls[CLOCKS_MTIME_KEY]
         mtime = None
-        if clocks_file and clocks_file.exists():
-            mtime = clocks_file.stat().st_mtime
+        with safe_file_io(clocks_file):
+            if clocks_file and clocks_file.exists():
+                mtime = clocks_file.stat().st_mtime
 
         if force or mtime != old_mtime:
             from .lib.clocks.displayclocks import DisplayClock
             from .lib.clocks.fmt import ThresholdSet
             cls.set(CLOCKS_MTIME_KEY, mtime)
+            clk_pool = list()
+            thresh_pool = dict()
+            clocks_jsonc = None
             if clocks_file:
-                clocks_jsonc = load_jsonc(clocks_file)
-                clk_pool, thresh_pool = parse_clocks_jsonc(clocks_jsonc)
+                with safe_file_io(clocks_file):
+                    clocks_jsonc = load_jsonc(clocks_file)
 
-            else:
-                clk_pool = []
-                thresh_pool = []
+                if not clocks_jsonc:
+                    return
+                clk_pool, thresh_pool = parse_clocks_jsonc(clocks_jsonc)
 
             DisplayClock.pool = clk_pool
             ThresholdSet.pool = thresh_pool
@@ -113,7 +124,8 @@ class PyCountdownApp(PyRandyOSApp):
         from .lib.clocks.displayclocks import DisplayClock
         from .lib.clocks.fmt import ThresholdSet
         data = export_clocks_jsonc(DisplayClock.pool, ThresholdSet.pool)
-        save_json(clocks_file, data)
+        with safe_file_io_retry(clocks_file):
+            save_json(clocks_file, data)
 
     @classmethod
     def is_muted(cls):

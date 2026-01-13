@@ -3,6 +3,7 @@ from PySide2.QtMultimedia import QAudioOutput, QAudioFormat, QAudio
 
 from ..lib.tones.constants import ALERT_SEQ
 from ..lib.tones.gen import generate_tone, BITRATE
+from ..app import PyCountdownApp
 
 
 class AudioPlayer:
@@ -26,7 +27,7 @@ class AudioPlayer:
 
     def start(self):
         self.audio_output.start(self.buffer)
-        
+
     def stop(self):
         self.audio_output.stop()
 
@@ -43,7 +44,8 @@ _active_players: set[AudioPlayer] = set()
 def play_alert_tones(sample_rate_hz: int = 48000):
     "Play alert tone sequence. Uses main thread event loop for playback."
     # Pre-generate all tone data and concatenate
-    data = b''.join(generate_tone(freq_hz, dur_s, sample_rate_hz, vol)
+    user_vol = PyCountdownApp.get('local.alert_volume_pct', 50)/100
+    data = b''.join(generate_tone(freq_hz, dur_s, sample_rate_hz, user_vol*vol)
                     for freq_hz, dur_s, vol in ALERT_SEQ)
 
     # Create player and keep reference alive until playback completes

@@ -6,7 +6,11 @@
 		},
 		{
 			"path": "C:/Users/emanspeaks/pycountdown",
-			"name": "work"
+			"name": "home_work"
+		},
+		{
+			"path": "C:/Users/raeckman/pycountdown",
+			"name": "work_work"
 		}
 	],
   "settings": {
@@ -50,7 +54,8 @@
 				"console": "integratedTerminal",
 				"justMyCode": false,
 				"args": [
-					"${workspaceFolder:root}/.pycountdown_config.jsonc"
+					// "${workspaceFolder:root}/.pycountdown_config.jsonc"
+					"${userHome}/pycountdown/.pycountdown_config.jsonc"
 				],
 				"cwd": "${workspaceFolder:root}"//,
 				// "guiEventLoop": "qt"
