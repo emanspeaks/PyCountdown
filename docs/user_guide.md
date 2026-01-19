@@ -6,86 +6,89 @@ A comprehensive guide to using PyCountdown, a powerful countdown clock applicati
 
 ## Table of Contents
 
-1. [Introduction](#introduction)
-2. [Installation](#installation)
-   - [Requirements](#requirements)
-   - [Installing from PyPI](#installing-from-pypi)
-   - [Installing from Source](#installing-from-source)
-   - [Optional Dependencies](#optional-dependencies)
-3. [Getting Started](#getting-started)
-   - [Launching PyCountdown](#launching-pycountdown)
-   - [First Steps](#first-steps)
-4. [Main Interface](#main-interface)
-   - [Toolbar](#toolbar)
-   - [Clock Table](#clock-table)
-     - [Selecting Clocks](#selecting-clocks)
-     - [Editing Clocks](#editing-clocks)
-5. [Working with Clocks](#working-with-clocks)
-   - [Understanding Clock Types](#understanding-clock-types)
-   - [Built-in Default Clocks](#built-in-default-clocks)
-   - [Creating a New Clock](#creating-a-new-clock)
-   - [Editing an Existing Clock](#editing-an-existing-clock)
-   - [Removing Clocks](#removing-clocks)
-   - [Reordering Clocks](#reordering-clocks)
-   - [Duplicating Clocks](#duplicating-clocks)
-6. [Epoch Widget](#epoch-widget)
-   - [Input format](#input-format)
-   - [Time fields](#time-fields)
-     - [Value entry](#value-entry)
-     - [Keyboard entry and navigation](#keyboard-entry-and-navigation)
-     - [Increment/decrement](#incrementdecrement)
-     - [DHMS Days](#dhms-days)
-   - [Epoch reference clock](#epoch-reference-clock)
-     - [Convert](#convert)
-     - [(now) clock](#now-clock)
-   - [Folds](#folds)
-7. [Clock Editor](#clock-editor)
-   - [Label and ID](#label-and-id)
-   - [Epoch Settings](#epoch-settings)
-   - [Real-time Reference](#real-time-reference)
-   - [Follow Clock](#follow-clock)
-   - [Tick Rate](#tick-rate)
-   - [Display Options](#display-options)
-     - [Hidden](#hidden)
-     - [Decimal Digits](#decimal-digits)
-     - [Zero-padded Width](#zero-padded-width)
-     - [Display Format](#display-format)
-     - [Threshold Set](#threshold-set)
-     - [Default Color](#default-color)
-8. [Timers](#timers)
-   - [Creating a Timer](#creating-a-timer)
-   - [Timer vs Clock](#timer-vs-clock)
-   - [Timer Value](#timer-value)
-9. [Threshold Sets](#threshold-sets)
-   - [Understanding Thresholds](#understanding-thresholds)
-   - [Creating and Managing Threshold Sets](#creating-and-managing-threshold-sets)
-   - [Threshold Set Example](#threshold-set-example)
-   - [Applying Threshold Sets](#applying-threshold-sets)
-10. [Clocks Files](#clocks-files)
+- [PyCountdown User Manual](#pycountdown-user-manual)
+  - [Table of Contents](#table-of-contents)
+  - [Introduction](#introduction)
+  - [Installation](#installation)
+    - [Requirements](#requirements)
+    - [Installing from PyPI](#installing-from-pypi)
+    - [Installing from Source](#installing-from-source)
+    - [Optional Dependencies](#optional-dependencies)
+  - [Getting Started](#getting-started)
+    - [Launching PyCountdown](#launching-pycountdown)
+    - [First Steps](#first-steps)
+  - [Main Interface](#main-interface)
+    - [Toolbar](#toolbar)
+    - [Clock Table](#clock-table)
+      - [Selecting Clocks](#selecting-clocks)
+      - [Editing Clocks](#editing-clocks)
+  - [Working with Clocks](#working-with-clocks)
+    - [Understanding Clock Types](#understanding-clock-types)
+    - [Built-in Default Clocks](#built-in-default-clocks)
+    - [Creating a New Clock](#creating-a-new-clock)
+    - [Editing an Existing Clock](#editing-an-existing-clock)
+    - [Removing Clocks](#removing-clocks)
+    - [Reordering Clocks](#reordering-clocks)
+    - [Duplicating Clocks](#duplicating-clocks)
+  - [Epoch Widget](#epoch-widget)
+    - [Input format](#input-format)
+    - [Time fields](#time-fields)
+      - [Value entry](#value-entry)
+      - [Keyboard entry and navigation](#keyboard-entry-and-navigation)
+      - [Increment/decrement](#incrementdecrement)
+      - [DHMS Days](#dhms-days)
+    - [Epoch reference clock](#epoch-reference-clock)
+      - [Convert](#convert)
+      - [(now) clock](#now-clock)
+    - [Folds](#folds)
+  - [Clock Editor](#clock-editor)
+    - [Label and ID](#label-and-id)
+    - [Epoch Settings](#epoch-settings)
+    - [Real-time Reference](#real-time-reference)
+    - [Follow Clock](#follow-clock)
+    - [Tick Rate](#tick-rate)
+    - [Display Options](#display-options)
+      - [Hidden](#hidden)
+      - [Decimal Digits](#decimal-digits)
+      - [Zero-padded Width](#zero-padded-width)
+      - [Display Format](#display-format)
+      - [Threshold Set](#threshold-set)
+      - [Default Color](#default-color)
+  - [Timers](#timers)
+    - [Creating a Timer](#creating-a-timer)
+    - [Timer vs Clock](#timer-vs-clock)
+    - [Timer Value](#timer-value)
+  - [Threshold Sets](#threshold-sets)
+    - [Understanding Thresholds](#understanding-thresholds)
+    - [Creating and Managing Threshold Sets](#creating-and-managing-threshold-sets)
+    - [Threshold Set Example](#threshold-set-example)
+    - [Applying Threshold Sets](#applying-threshold-sets)
+  - [Clocks Files](#clocks-files)
     - [Default File Location](#default-file-location)
     - [File Operations](#file-operations)
     - [Auto-reload](#auto-reload)
     - [Clocks JSON Editor](#clocks-json-editor)
     - [Time Formats](#time-formats)
       - [Available Formats](#available-formats)
-      - [DHMS Format Details](#dhms-format-details)
+        - [DHMS Format Details](#dhms-format-details)
     - [Tick Rates](#tick-rates)
       - [Rate Inheritance](#rate-inheritance)
-11. [Program Configuration](#program-configuration)
+  - [Program Configuration](#program-configuration)
     - [Configuration Viewer](#configuration-viewer)
     - [Key Settings](#key-settings)
     - [Saving Configuration](#saving-configuration)
-12. [Keyboard Shortcuts](#keyboard-shortcuts)
-13. [Clocks File Format (JSON Schema)](#clocks-file-format-json-schema)
+  - [Keyboard Shortcuts](#keyboard-shortcuts)
+  - [Clocks File Format (JSON Schema)](#clocks-file-format-json-schema)
     - [Clock Object Properties](#clock-object-properties)
     - [Epoch Object Properties](#epoch-object-properties)
     - [Display Object Properties](#display-object-properties)
-14. [Advanced Topics](#advanced-topics)
+    - [Threshold Object Properties](#threshold-object-properties)
+  - [Advanced Topics](#advanced-topics)
     - [Clock Relationships](#clock-relationships)
     - [Example: Mission Timer](#example-mission-timer)
     - [Example: Countdown with Multiple Checkpoints](#example-countdown-with-multiple-checkpoints)
     - [Window Always-on-Top](#window-always-on-top)
-15. [Troubleshooting](#troubleshooting)
+  - [Troubleshooting](#troubleshooting)
     - [Using the Log History](#using-the-log-history)
     - [Clock Not Updating](#clock-not-updating)
     - [Colors Not Changing](#colors-not-changing)
@@ -93,7 +96,7 @@ A comprehensive guide to using PyCountdown, a powerful countdown clock applicati
     - [Clock Shows Wrong Time](#clock-shows-wrong-time)
     - [Application Won't Start](#application-wont-start)
     - [Common Log Messages](#common-log-messages)
-16. [Support](#support)
+  - [Support](#support)
 
 ---
 
@@ -267,6 +270,7 @@ PyCountdown includes these pre-defined clocks that can be referenced:
 1. Double-click the clock row, click the row header, or highlight the row and press **Enter**
 2. Modify the desired properties
 3. Click **OK** or press **Enter** to save changes, or **Cancel** to discard
+4. To delete the clock from within the editor, click the **Delete** button in the bottom-left corner
 
 ### Removing Clocks
 
@@ -366,7 +370,7 @@ The **Convert** option allows converting the time value entry when the selected 
 
 #### (now) clock
 
-If `(now)` is selected, the DHMS value entered will be added to the time at the instant that the dialog is saved and closed.  This clock is selected by default in the Add Timer dialog.  Note that using `(now)` with the Convert option checked will sample the time at the instant the selected clock is changed, and can result in strange values.  Exercise caution using the convert feature when `(now)` is selected as either the source or destination of the conversion.
+If `(now)` is selected, the DHMS value entered will be added to the time at the instant that the dialog is saved and closed.  This clock is selected by default in the Add Timer dialog.  Note that using `(now)` with the Convert option checked will reset the epoch to zero when converting to or from `(now)`, since conversions involving the current time are not meaningful.  Exercise caution using the convert feature when `(now)` is selected as either the source or destination of the conversion.
 
 ### Folds
 
@@ -506,8 +510,9 @@ A threshold set is a list of thresholds, each defining:
 
 - An **epoch** (time value)
 - A **color** to display when the clock time reaches that threshold
+- A **play alert** option to trigger an audible tone when this threshold is crossed
 
-The clock displays the color of the most recent threshold (chronologically) that has been reached. When a clock transitions to a new threshold (the time crosses the threshold epoch), an audible alert tone is played (unless muted).
+The clock displays the color of the most recent threshold (chronologically) that has been reached. When a clock transitions to a new threshold that has "Play alert" enabled, an audible alert tone is played (unless muted).
 
 ### Creating and Managing Threshold Sets
 
@@ -518,6 +523,7 @@ The clock displays the color of the most recent threshold (chronologically) that
 5. For each threshold:
    - Set the epoch (time value) or leave blank for default
    - Choose a color
+   - Check **Play alert** if you want an audible tone when this threshold is crossed
    - Click **Update threshold** to save
 6. Click **Save** or **OK** when done
 
@@ -578,7 +584,7 @@ The default location of the clocks file is defined in the program configuration 
 
 ### Auto-reload
 
-PyCountdown periodically checks the clocks file for changes (every 5 seconds by default, configurable with `${clocks_file_check_sec}` in global program config) and automatically reloads if modified externally.
+PyCountdown periodically checks the clocks file for changes (every 10 seconds by default, configurable with `${clocks_file_check_sec}` in global program config) and automatically reloads if modified externally.
 
 ### Clocks JSON Editor
 
@@ -647,10 +653,11 @@ The configuration dialog displays:
 | Setting | Description |
 | --------- | ------------- |
 | `clocks_file` | Path to the default clocks file |
-| `clocks_file_check_sec` | Interval for checking file changes (default: 5) |
+| `clocks_file_check_sec` | Interval for checking file changes (default: 10) |
 | `local.show_hidden` | Whether hidden clocks are visible by default |
 | `local.always_on_top` | Window stays above other windows |
 | `local.always_on_top_opacity` | Window opacity when not focused (0.0-1.0) |
+| `local.alert_volume_pct` | Alert tone volume as a percentage (0-100, default: 50) |
 | `local.json_schema` | URL for clocks file JSON schema |
 
 Note that settings prefixed with `local.` may be set, changed, or overridden by the local program config file, and defaults for them may be set in the global program config file by fully specifying with the `local.` prefix.  Local file values always take precedence over ones set in the global program config file.  Note that the namespace otherwise do not overlap; local file allows only overriding a subset of overall configuration.
@@ -699,9 +706,9 @@ The clocks file is a JSONC (JSON with comments) file with the following structur
   "threshold_sets": {
     "warning": [
       { "color": "white" },
-      { "epoch": { "t": -300 }, "color": "yellow" },
-      { "epoch": { "t": -60 }, "color": "red" },
-      { "epoch": { "t": 0 }, "color": "green" }
+      { "epoch": { "t": -300 }, "color": "yellow", "play_alert": true },
+      { "epoch": { "t": -60 }, "color": "red", "play_alert": true },
+      { "epoch": { "t": 0 }, "color": "green", "play_alert": true }
     ]
   },
   "clocks": [
@@ -766,6 +773,16 @@ The clocks file is a JSONC (JSON with comments) file with the following structur
 | `zeropad` | number | Minimum width with zero-padding |
 | `thresholds` | string | Threshold set name |
 | `color` | string/array | Default color (name or RGB array) |
+
+### Threshold Object Properties
+
+Each threshold in a threshold set array can have these properties:
+
+| Property | Type | Description |
+| ------------ | ------------ | ------------- |
+| `epoch` | object | Epoch definition (omit for default/starting threshold) |
+| `color` | string/array | Color to display (name or RGB array) |
+| `play_alert` | boolean | If true, plays an audible alert when this threshold is crossed |
 
 ---
 
@@ -901,7 +918,3 @@ Use the log history to:
 
 - **Issues**: <https://github.com/emanspeaks/pycountdown/issues>
 - **Source**: <https://github.com/emanspeaks/pycountdown>
-
----
-
-<!-- PyCountdown - Countdown clocks made easy -->

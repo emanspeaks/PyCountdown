@@ -384,6 +384,20 @@ class MainWindow(GuiWindow[MainWindowView]):
         pool = DisplayClock.pool
         if pool:
             dclk = pool[-1]  # Assuming the newly added is last in pool
-            row = DisplayClock.get_visible_idx_for_idx(len(pool) - 1) + 1
-            self.gui_view.clock_table.selectRow(row - 1)
-            log_info(f"Clock {dclk.label!r} added to row {row}")
+            if dclk.hidden:
+                log_info(f"Clock {dclk.label!r} added")
+                return
+            vis_idx = DisplayClock.get_visible_idx_for_idx(len(pool) - 1)
+            self.gui_view.clock_table.selectRow(vis_idx)
+            log_info(f"Clock {dclk.label!r} added to row {vis_idx + 1}")
+
+    def select_and_notify_edited_clock(self, idx: int):
+        pool = DisplayClock.pool
+        if pool:
+            dclk = pool[idx]
+            if dclk.hidden:
+                log_info(f"Clock {dclk.label!r} edited")
+                return
+            vis_idx = DisplayClock.get_visible_idx_for_idx(idx)
+            self.gui_view.clock_table.selectRow(vis_idx)
+            log_info(f"Clock {dclk.label!r} edited at row {vis_idx + 1}")

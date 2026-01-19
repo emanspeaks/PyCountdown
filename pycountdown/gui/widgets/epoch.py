@@ -301,8 +301,8 @@ class EpochWidget(QtWidgetWrapper[QFrame]):
         parent.setTabOrder(self.ymdhms.qtobj, self.y_doy_hms.qtobj)
 
         show_clocklist = self.show_clocklist
-        nxt = self.clocklist.qtobj if show_clocklist else self.fold_known
-        parent.setTabOrder(self.y_doy_hms.qtobj, nxt)
+        tmp = self.clocklist.qtobj if show_clocklist else self.fold_known
+        parent.setTabOrder(self.y_doy_hms.qtobj, tmp)
         if show_clocklist:
             parent.setTabOrder(self.clocklist.qtobj, self.convert)
             parent.setTabOrder(self.convert, self.fold_known)
