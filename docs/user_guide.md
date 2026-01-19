@@ -2,8 +2,6 @@
 
 A comprehensive guide to using PyCountdown, a powerful countdown clock application for managing multiple customizable timers and clocks.
 
----
-
 ## Table of Contents
 
 - [PyCountdown User Manual](#pycountdown-user-manual)
@@ -98,8 +96,6 @@ A comprehensive guide to using PyCountdown, a powerful countdown clock applicati
     - [Common Log Messages](#common-log-messages)
   - [Support](#support)
 
----
-
 ## Introduction
 
 PyCountdown is a desktop application for displaying and managing multiple countdown timers and clocks. It supports:
@@ -113,8 +109,6 @@ PyCountdown is a desktop application for displaying and managing multiple countd
 - Always-on-top window mode with opacity control
 
 PyCountdown is built on the PyRandyOS framework and uses PySide2 (Qt) for its graphical interface.
-
----
 
 ## Installation
 
@@ -146,8 +140,6 @@ For dark theme support:
 pip install PyCountdown[qdarkstyle]
 ```
 
----
-
 ## Getting Started
 
 ### Launching PyCountdown
@@ -169,8 +161,6 @@ python -m pycountdown /path/to/clocks.jsonc
 1. **Create your first clock**: Click the "Add clock" button in the toolbar
 2. **Create a timer**: Click the "Add timer" button for a quick countdown
 3. **Save your configuration**: Use "Save Clocks file as..." to persist your clocks
-
----
 
 ## Main Interface
 
@@ -222,8 +212,6 @@ The main display shows all clocks in a two-column table:
 - Double-click any row to open the clock editor for that clock
 - Click the row header (row number) to open the clock editor
 - Press **Enter** to edit the selected clock
-
----
 
 ## Working with Clocks
 
@@ -289,8 +277,6 @@ PyCountdown includes these pre-defined clocks that can be referenced:
 1. Select one or more clocks
 2. Click **Duplicate** or press **Ctrl+D**
 3. A copy is created immediately below each selected clock
-
----
 
 ## Epoch Widget
 
@@ -378,8 +364,6 @@ A *time fold* is when a particular numerical time can be repeated in a timescale
 
 Note that UTC does not "fold" during leap seconds, but Unix time does.  The time used internally by PyCountdown depends on the underlying system implementation of the Python standard library `time.time()`, which typically reports the system clock as a Unix timestamp, and therefore may be susceptible to errors during a leap second.  PyCountdown and the system clock should correct themselves following the leap second, but the time during the leap second may be in error.  It is unlikely that PyCountdown will ever be used for critical operations spanning a leap second, especially since the timekeeping community is moving towards recommending ending the practice of leap seconds, but this is still undecided as of the time of this writing. This software has no warranty per its MIT License, so exercise caution should PyCountdown be used in environments where this matters.
 
----
-
 ## Clock Editor
 
 The clock editor dialog allows complete control over clock properties.
@@ -466,8 +450,6 @@ Select a threshold set to apply color-based styling. See [Threshold Sets](#thres
 
 Click to choose the default text color for this clock.  Used if no threshold set is selected or, if threshold set is given, if no current threshold applies to the time.
 
----
-
 ## Timers
 
 Timers are simplified clocks designed for quick countdowns/count-ups.
@@ -495,8 +477,6 @@ Timers differ from clocks in that:
 - Sets the new clock epoch (i.e. zero time) to **"now" + entered DHMS value**
 - Negative values set the clock zero to DHMS time *ago*
 - Positive values set the clock zero to DHMS time *ahead*
-
----
 
 ## Threshold Sets
 
@@ -554,8 +534,6 @@ Or, in the clock editor:
 2. Check **Threshold sets**
 3. Select the desired threshold set from the dropdown
 4. Click **OK**
-
----
 
 ## Clocks Files
 
@@ -632,8 +610,6 @@ When a clock follows another:
 - If no rate is specified, it inherits the followed clock's rate
 - If no follow is specified and no rate is set, TAI is used
 
----
-
 ## Program Configuration
 
 View currently-loaded program settings via the **Program config** button.  Note this is a read-only display and changes must be made to either the local or global program config files if something must be updated and requires restarting the program to incorporate.
@@ -667,8 +643,6 @@ Note that settings prefixed with `local.` may be set, changed, or overridden by 
 - **Save Local Config**: Saves the `local` dictionary to a new file (i.e. allows exporting a copy of the current "local config" to a new file)
 - **Export Full Config**: Exports all global program configuration to a new file, including local dictionary.
 
----
-
 ## Keyboard Shortcuts
 
 | Shortcut         | Context                             | Action                                    |
@@ -693,8 +667,6 @@ Note that settings prefixed with `local.` may be set, changed, or overridden by 
 | **Ctrl+Shift+Z** | Clock editor                        | Redo                                      |
 | **Ctrl+F**       | JSON editor                         | Find                                      |
 | **F3**           | JSON editor                         | Find next                                 |
-
----
 
 ## Clocks File Format (JSON Schema)
 
@@ -784,8 +756,6 @@ Each threshold in a threshold set array can have these properties:
 | `color` | string/array | Color to display (name or RGB array) |
 | `play_alert` | boolean | If true, plays an audible alert when this threshold is crossed |
 
----
-
 ## Advanced Topics
 
 ### Clock Relationships
@@ -843,8 +813,6 @@ Configure the window to stay on top with reduced opacity when inactive:
 
 1. Set `local.always_on_top` to `true` in configuration
 2. Set `local.always_on_top_opacity` to a value between 0.0 and 1.0
-
----
 
 ## Troubleshooting
 
@@ -911,8 +879,6 @@ Use the log history to:
 | `clocks file reloaded` | Configuration file was successfully loaded |
 | `Clock not found: <name>` | A referenced clock ID doesn't exist |
 | `Unresolved clocks` | Circular dependency or missing reference in clock definitions |
-
----
 
 ## Support
 
