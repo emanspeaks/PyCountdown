@@ -29,7 +29,9 @@ qdarkstyle = [
   "qdarkstyle",
 ]
 dev = [
-  "types-pyside2",
+  "hatch-vcs",
+  "hatchling",
+  "types-pyside2",  # pip only
 ]
 
 [tool.hatch.version]
