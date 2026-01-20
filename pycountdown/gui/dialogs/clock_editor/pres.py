@@ -33,6 +33,7 @@ class ClockEditorDialog(GuiDialog[ClockEditorDialogView]):
                           rate=None),
             ClockFormatter()
         )
+        self.idx = DisplayClock.pool.index(dclk) if dclk else -1
         self.timer = timer
         title = ("Edit Clock" if dclk
                  else ("New Timer" if timer else "New Clock"))
@@ -57,7 +58,11 @@ class ClockEditorDialog(GuiDialog[ClockEditorDialogView]):
             self.save_clock()
             PyCountdownApp.export_clocks_file()
             mw.refresh_clocks_file(True)
-            mw.select_and_notify_added_clock()
+            if self.new:
+                mw.select_and_notify_added_clock()
+
+            else:
+                mw.select_and_notify_edited_clock(self.idx)
 
         if btn is buttons.button(QDialogButtonBox.Ok):
             self.gui_view.qtobj.accept()
